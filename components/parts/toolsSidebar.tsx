@@ -11,6 +11,7 @@ type Item = {
 
 const items: Item[] = [
   { href: "/tools/plan", label: "計画書生成", enabled: true },
+  { href: "/tools/classDesign", label: "クラス仕様書生成", enabled: true },
   { href: "/tools/testCode", label: "テストコード生成", enabled: true },
   { href: "/tools/files", label: "ファイル管理", enabled: false },
 ];

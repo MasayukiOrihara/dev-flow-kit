@@ -15,7 +15,7 @@ export default function ToolsLayout({
 
       {/* 下：メイン機能（左サイドバー＋右コンテンツ） */}
       <div className="flex flex-1 min-h-0">
-        <aside className="w-64 border-r p-3 overflow-auto">
+        <aside className="w-48 border-r p-3 overflow-auto">
           <ToolsSidebar />
         </aside>
 

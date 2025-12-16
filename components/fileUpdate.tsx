@@ -70,7 +70,7 @@ export default function FileUpdate() {
       </div>
 
       <h2>アップロード済みファイル</h2>
-      <ul className="text-sm">
+      <ul className="text-sm whitespace-nowrap overflow-hidden text-ellipsis">
         {files.map((f) => (
           <li key={f.id}>
             <a href={`/api/files/${f.id}`} target="_blank" rel="noreferrer">
