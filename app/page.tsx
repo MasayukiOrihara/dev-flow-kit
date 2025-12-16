@@ -1,18 +1,6 @@
-import { Chat } from "@/components/chat";
-import ExcelToJsonUploader from "@/components/excel";
-import FileUpdate from "@/components/fileUpdate";
+// app/page.tsx
+import { redirect } from "next/navigation";
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <FileUpdate />
-        <Chat />
-        <ExcelToJsonUploader />
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <p>made by orihara</p>
-      </footer>
-    </div>
-  );
+  redirect("/tools/plan");
 }

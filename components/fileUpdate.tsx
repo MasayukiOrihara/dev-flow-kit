@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Button } from "./ui/button";
+import { FileSelectButton } from "./fileSelectButton";
 
 type FileMeta = {
   id: string;
@@ -9,6 +11,13 @@ type FileMeta = {
   mime: string;
   uploadedAt: string;
 };
+
+function humanizeMime(mime: string) {
+  if (mime.includes("spreadsheet")) return "Excel (.xlsx)";
+  if (mime.includes("wordprocessing")) return "Word (.docx)";
+  if (mime === "application/pdf") return "PDF";
+  return mime;
+}
 
 export default function FileUpdate() {
   const [files, setFiles] = useState<FileMeta[]>([]);
@@ -52,26 +61,33 @@ export default function FileUpdate() {
   };
 
   return (
-    <main style={{ padding: 16 }}>
-      <h1>Dev Flow Kit - Files</h1>
+    <main className="px-8 py-4">
+      <h1>Dev Flow Kit - ファイル選択</h1>
 
-      <input type="file" multiple onChange={onUpload} />
-      {uploading ? <p>Uploading...</p> : null}
+      <div className="m-3 text-xs text-zinc-500">
+        <FileSelectButton onUpload={onUpload} />
+        {uploading ? <p className="ml-3">アップロード中...</p> : null}
+      </div>
 
-      <h2>Uploaded</h2>
-      <ul>
+      <h2>アップロード済みファイル</h2>
+      <ul className="text-sm">
         {files.map((f) => (
           <li key={f.id}>
             <a href={`/api/files/${f.id}`} target="_blank" rel="noreferrer">
               {f.name}
             </a>{" "}
             <small>
-              ({Math.round(f.size / 1024)}KB / {f.mime} /{" "}
+              ({Math.round(f.size / 1024)}KB / {humanizeMime(f.mime)} /{" "}
               {new Date(f.uploadedAt).toLocaleString()})
             </small>
-            <button onClick={() => onDelete(f.id)} style={{ marginLeft: 8 }}>
+            <Button
+              variant="default"
+              size="xs"
+              onClick={() => onDelete(f.id)}
+              className="hover:bg-red-500 ml-2"
+            >
               削除
-            </button>
+            </Button>
           </li>
         ))}
       </ul>
