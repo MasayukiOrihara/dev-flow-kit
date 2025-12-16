@@ -1,63 +1,14 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import crypto from "node:crypto";
+import { FileMeta } from "@/contents/types/file.type";
+import { ensureDirs } from "@/lib/files/ensureDirs.file";
+import { readMeta, writeMeta } from "@/lib/files/meta.file";
+import { safeFileName } from "@/lib/files/safeFileName.file";
+import { INPUT_DIR } from "@/contents/parametars/file.parametar";
 
 // fsを使うのでNode runtime
 export const runtime = "nodejs";
-
-const INPUT_DIR = process.env.INPUT_DIR ?? "./workspace/inputs";
-const META_DIR = process.env.META_DIR ?? "./workspace/meta";
-const META_FILE = path.join(META_DIR, "files.json");
-
-type FileMeta = {
-  id: string;
-  name: string;
-  size: number;
-  mime: string;
-  savedPath: string; // inputs配下の相対パス
-  uploadedAt: string; // ISO
-};
-
-/**
- * ディレクトリの作成
- */
-async function ensureDirs() {
-  await fs.mkdir(INPUT_DIR, { recursive: true });
-  await fs.mkdir(META_DIR, { recursive: true });
-}
-
-/**
- * メタ情報の読み込み
- * @returns
- */
-async function readMeta(): Promise<FileMeta[]> {
-  try {
-    const s = await fs.readFile(META_FILE, "utf-8");
-    return JSON.parse(s) as FileMeta[];
-  } catch {
-    return [];
-  }
-}
-
-/**
- * メタ情報の書き込み
- * @param list
- */
-async function writeMeta(list: FileMeta[]) {
-  await fs.writeFile(META_FILE, JSON.stringify(list, null, 2), "utf-8");
-}
-
-/**
- * ファイル名の安全化
- * @param original
- * @returns
- */
-function safeFileName(original: string) {
-  // パストラバーサル対策：ファイル名だけ残す
-  const base = path.basename(original);
-  // 超ざっくり危険文字を除去（必要なら強化）
-  return base.replace(/[^\w.\-()\[\] ]/g, "_");
-}
 
 /**
  * アップロードAPI

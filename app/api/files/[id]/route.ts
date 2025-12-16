@@ -1,38 +1,10 @@
+import { INPUT_DIR } from "@/contents/parametars/file.parametar";
+import { ensureDirs } from "@/lib/files/ensureDirs.file";
+import { readMeta, writeMeta } from "@/lib/files/meta.file";
 import fs from "node:fs/promises";
 import path from "node:path";
 
 export const runtime = "nodejs";
-
-const INPUT_DIR = process.env.INPUT_DIR ?? "./inputs";
-const META_DIR = process.env.META_DIR ?? "./workspace/meta";
-const META_FILE = path.join(META_DIR, "files.json");
-
-type FileMeta = {
-  id: string;
-  name: string;
-  size: number;
-  mime: string;
-  savedPath: string;
-  uploadedAt: string;
-};
-
-async function ensureDirs() {
-  await fs.mkdir(INPUT_DIR, { recursive: true });
-  await fs.mkdir(META_DIR, { recursive: true });
-}
-
-async function readMeta(): Promise<FileMeta[]> {
-  try {
-    const s = await fs.readFile(META_FILE, "utf-8");
-    return JSON.parse(s) as FileMeta[];
-  } catch {
-    return [];
-  }
-}
-
-async function writeMeta(list: FileMeta[]) {
-  await fs.writeFile(META_FILE, JSON.stringify(list, null, 2), "utf-8");
-}
 
 export async function GET(
   _req: Request,
@@ -43,7 +15,7 @@ export async function GET(
   const list = await readMeta();
   const meta = list.find((m) => m.id === id);
 
-  if (!meta) {
+  if (!meta || !meta.savedPath) {
     return Response.json({ error: "not found" }, { status: 404 });
   }
 
@@ -74,6 +46,9 @@ export async function DELETE(
   if (idx === -1) return Response.json({ error: "not found" }, { status: 404 });
 
   const meta = list[idx];
+  if (!meta.savedPath) {
+    return Response.json({ error: "not found" }, { status: 404 });
+  }
   const absPath = path.join(INPUT_DIR, meta.savedPath);
 
   // 1) 実体削除（無くてもOK扱いにする）

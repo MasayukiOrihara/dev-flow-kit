@@ -3,26 +3,16 @@
 import { useEffect, useState } from "react";
 import { Button } from "./ui/button";
 import { FileSelectButton } from "./fileSelectButton";
-
-type FileMeta = {
-  id: string;
-  name: string;
-  size: number;
-  mime: string;
-  uploadedAt: string;
-};
-
-function humanizeMime(mime: string) {
-  if (mime.includes("spreadsheet")) return "Excel (.xlsx)";
-  if (mime.includes("wordprocessing")) return "Word (.docx)";
-  if (mime === "application/pdf") return "PDF";
-  return mime;
-}
+import { FileMeta } from "@/contents/types/file.type";
+import { humanizeMime } from "@/lib/files/humanizeMime.file";
 
 export default function FileUpdate() {
   const [files, setFiles] = useState<FileMeta[]>([]);
   const [uploading, setUploading] = useState(false);
 
+  /**
+   * ファイルロード処理
+   */
   const load = async () => {
     const res = await fetch("/api/files");
     const json = await res.json();
@@ -33,6 +23,11 @@ export default function FileUpdate() {
     load();
   }, []);
 
+  /**
+   * データアップロードAPI
+   * @param e
+   * @returns
+   */
   const onUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files?.length) return;
 
@@ -51,6 +46,11 @@ export default function FileUpdate() {
     }
   };
 
+  /**
+   * データ削除API
+   * @param id
+   * @returns
+   */
   const onDelete = async (id: string) => {
     const res = await fetch(`/api/files/${id}`, { method: "DELETE" });
     if (!res.ok) {
