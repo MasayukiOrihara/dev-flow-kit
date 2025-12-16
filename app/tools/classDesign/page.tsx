@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { postJson } from "@/lib/api/postJson.api";
 import { useState } from "react";
 
 /**
@@ -12,24 +13,40 @@ export default function ClassDesignPage() {
   const [text, setText] = useState("");
   const [err, setErr] = useState("");
 
+  const [isRunning, setIsRunning] = useState(false);
+
+  /**
+   * ファイルの読み込み
+   * @returns
+   */
   const load = async () => {
+    if (isRunning) return;
     setErr("");
     setText("");
+    setIsRunning(true);
 
-    const res = await fetch("/api/files/textByName", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ fileName }),
-    });
+    try {
+      // 1) 読み込み
+      const fileRes = await postJson<{ text: string }>(
+        "/api/files/textByName",
+        { fileName },
+        "ファイルが読み込みできませんでした"
+      );
+      setText(fileRes.text);
 
-    const json = await res.json().catch(() => ({}));
-
-    if (!res.ok) {
-      setErr(json?.error ?? "failed");
-      return;
+      // 2) 結果生成
+      const outputRes = await postJson<{ text: string }>(
+        "/api/exportExcel/classDesign/toCode",
+        { fileName, codeText: fileRes.text },
+        "生成に失敗しました"
+      );
+      setText(outputRes.text);
+    } catch (e: any) {
+      console.error(e);
+      setErr(e.message);
+    } finally {
+      setIsRunning(false);
     }
-
-    setText(json.text ?? "");
   };
 
   return (
@@ -41,19 +58,29 @@ export default function ClassDesignPage() {
 
       <div className="my-4">
         <h2>① コードから生成する</h2>
-        <div className="flex gap-2 items-center">
-          <input
-            className="border rounded px-2 py-1"
-            value={fileName}
-            onChange={(e) => setFileName(e.target.value)}
-          />
-          <Button onClick={load} className="active:brightness-90">
-            読み込み
-          </Button>
+        <div className="my-2">
+          <h3 className="text-muted-foreground">
+            生成元コードのファイル名を入力してください
+          </h3>
+          <div className="flex gap-2 items-center">
+            <input
+              className="border rounded px-2 py-1"
+              value={fileName}
+              onChange={(e) => setFileName(e.target.value)}
+            />
+            <Button
+              onClick={load}
+              disabled={isRunning}
+              className="bg-blue-400 hover:bg-blue-600"
+            >
+              {isRunning ? "処理中..." : "読み込み→生成"}
+            </Button>
+          </div>
+
+          {err ? <p className="text-red-400 font-bold text-sm">{err}</p> : null}
         </div>
 
-        {err ? <p className="text-red-600">{err}</p> : null}
-
+        <h3 className="text-muted-foreground">解析結果</h3>
         <pre className="border rounded p-3 overflow-auto whitespace-pre-wrap">
           {text}
         </pre>

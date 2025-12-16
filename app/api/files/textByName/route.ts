@@ -18,7 +18,7 @@ export async function POST(req: Request) {
   // ガード：必須 & 文字列
   if (typeof fileName !== "string" || fileName.trim() === "") {
     return Response.json(
-      { error: "fileName is required (string)" },
+      { error: "ファイル名が取得できませんでした" },
       { status: 400 }
     );
   }
@@ -29,7 +29,10 @@ export async function POST(req: Request) {
   // 同名が複数ある可能性があるので、最新(uploadedAtが新しい)を優先
   const candidates = list.filter((m) => m.name === fileName);
   if (candidates.length === 0) {
-    return Response.json({ error: "file not found" }, { status: 404 });
+    return Response.json(
+      { error: "ファイルが見つかりませんでした" },
+      { status: 404 }
+    );
   }
 
   // ファイル情報の取得
@@ -38,7 +41,11 @@ export async function POST(req: Request) {
     .sort((a, b) => (a.uploadedAt < b.uploadedAt ? 1 : -1))[0];
   if (!isProbablyTextFile(meta.name, meta.mime)) {
     return Response.json(
-      { error: "file is not a text file", mime: meta.mime, name: meta.name },
+      {
+        error: "テキストファイルではありませんでした",
+        mime: meta.mime,
+        name: meta.name,
+      },
       { status: 400 }
     );
   }

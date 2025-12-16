@@ -42,7 +42,17 @@ export async function POST(req: Request) {
     // ガード：必須 & 文字列
     if (typeof codeText !== "string" || codeText.trim() === "") {
       return Response.json(
-        { error: "codeText is required (string)" },
+        { error: "コードが取得できませんでした" },
+        { status: 400 }
+      );
+    }
+
+    // ファイル名の取得
+    const fileName = body?.fileName;
+    // ガード：必須 & 文字列
+    if (typeof fileName !== "string" || fileName.trim() === "") {
+      return Response.json(
+        { error: "ファイル名が取得できませんでした" },
         { status: 400 }
       );
     }
@@ -53,26 +63,21 @@ export async function POST(req: Request) {
     const template = COMPONENT_ANALYZE_TEMPLATE;
 
     // パサーを作成
-    const parser = StringOutputParser;
+    const parser = new StringOutputParser();
 
     const prompt = PromptTemplate.fromTemplate(template);
     const promptVariables = {
-      fileName: "file",
+      fileName: fileName,
       code: codeText,
     };
     // LLM 応答
     const chain = prompt.pipe(OpenAi41).pipe(parser);
     const response = await chain.invoke(promptVariables);
 
-    // Excel ファイル出力
-    // const payload: Payload = { fileName: file, cases: response };
-    // await exportFile(payload);
-    console.log(response);
-
     console.log("ファイル解析完了 !");
     return Response.json(
       {
-        message: response,
+        text: response,
       },
       { status: 200 }
     );
