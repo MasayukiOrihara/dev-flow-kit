@@ -1,39 +1,17 @@
-import { INPUT_DIR } from "@/contents/parametars/file.parametar";
-import { exportFile } from "@/lib/excel/exportFile";
-import { Payload } from "@/lib/excel/exportSpecToExcel";
-import { readMeta } from "@/lib/files/meta.file";
-import { CHECK_ERROR, UNKNOWN_ERROR, URL_ERROR } from "@/lib/messages";
+import { CLASS_DESIGN_DIR } from "@/contents/parametars/file.parametar";
+import { CHECK_ERROR, UNKNOWN_ERROR } from "@/lib/messages";
 import { OpenAi41 } from "@/lib/models";
-import {
-  ComprehensiveTestCaseRow,
-  ComprehensiveTestCaseRowArraySchema,
-  ComprehensiveTestCaseRowSchema,
-  TestCaseRow,
-  TestCaseRowArraySchema,
-} from "@/lib/schema";
-import {
-  COMPREHENSIVE_TEST_OUTPUT_EMPLATE,
-  TEST_ANALYZE_OUTPUT_TEMPLATE,
-} from "@/lib/template/test-template";
-import { messageText } from "@/lib/utils";
-import {
-  StringOutputParser,
-  StructuredOutputParser,
-} from "@langchain/core/output_parsers";
+import { StringOutputParser } from "@langchain/core/output_parsers";
 import { PromptTemplate } from "@langchain/core/prompts";
-import { UIMessage } from "ai";
-import { readFileSync } from "fs";
-import path from "node:path";
-import fs from "node:fs/promises";
-import { COMPONENT_ANALYZE_TEMPLATE } from "@/lib/template/class-template";
+import { loadTemplateById } from "@/app/api/prompts/loadTemplateById/route";
 
 export const runtime = "nodejs";
 
-export const SCENARIO_PATH = "public/markdowns/";
-export const MARKDOWN_READ_API = "/api/markdown/read";
-
-export const FILE_PATH = "public/files/";
-
+/**
+ * コードからクラス仕様書を出力する
+ * @param req
+ * @returns
+ */
 export async function POST(req: Request) {
   try {
     const body = await req.json().catch(() => ({} as any));
@@ -57,10 +35,19 @@ export async function POST(req: Request) {
       );
     }
 
+    // プロンプトテンプレートの取得
+    const formatId = body?.formatId;
+    if (typeof formatId !== "string" || formatId.trim() === "") {
+      return Response.json(
+        { error: "テンプレートが選択されていません" },
+        { status: 400 }
+      );
+    }
+
     /* === === LLM === === */
     console.log("ファイル解析中...");
     // プロンプトの取得
-    const template = COMPONENT_ANALYZE_TEMPLATE;
+    const template = await loadTemplateById(formatId, CLASS_DESIGN_DIR);
 
     // パサーを作成
     const parser = new StringOutputParser();

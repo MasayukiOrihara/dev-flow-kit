@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { postJson } from "@/lib/api/postJson.api";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 /**
  * クラス仕様書生成ページ
@@ -13,7 +13,22 @@ export default function ClassDesignPage() {
   const [text, setText] = useState("");
   const [err, setErr] = useState("");
 
+  const [templates, setTemplates] = useState<
+    { id: string; label: string; enabled: boolean }[]
+  >([]);
+  const [formatId, setFormatId] = useState<string>("class-basic");
+
   const [isRunning, setIsRunning] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      const res = await fetch("/api/prompts?kind=classDesign");
+      const json = await res.json().catch(() => ({}));
+      setTemplates(json.templates ?? []);
+      if ((json.templates ?? []).length && !formatId)
+        setFormatId(json.templates[0].id);
+    })();
+  }, []);
 
   /**
    * ファイルの読み込み
@@ -37,7 +52,7 @@ export default function ClassDesignPage() {
       // 2) 結果生成
       const outputRes = await postJson<{ text: string }>(
         "/api/exportExcel/classDesign/toCode",
-        { fileName, codeText: fileRes.text },
+        { fileName, codeText: fileRes.text, formatId },
         "生成に失敗しました"
       );
       setText(outputRes.text);
@@ -62,7 +77,7 @@ export default function ClassDesignPage() {
         <h2>① コードから解析</h2>
         <div className="my-2">
           <h3 className="text-muted-foreground">
-            生成元コードのファイル名を入力してください
+            生成元コードのファイル名と使用するプロンプトを指定してください
           </h3>
           <div className="flex gap-2 items-center">
             <input
@@ -70,6 +85,20 @@ export default function ClassDesignPage() {
               value={fileName}
               onChange={(e) => setFileName(e.target.value)}
             />
+
+            <select
+              className="border rounded px-2 py-1"
+              value={formatId}
+              onChange={(e) => setFormatId(e.target.value)}
+            >
+              {templates.map((t) => (
+                <option key={t.id} value={t.id} disabled={!t.enabled}>
+                  {t.label}
+                  {!t.enabled ? "（準備中）" : ""}
+                </option>
+              ))}
+            </select>
+
             <Button
               onClick={load}
               disabled={isRunning}
