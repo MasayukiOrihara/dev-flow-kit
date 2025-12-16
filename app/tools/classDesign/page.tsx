@@ -9,14 +9,14 @@ import { useEffect, useState } from "react";
  * @returns
  */
 export default function ClassDesignPage() {
-  const [fileName, setFileName] = useState("CurriculumDetail.tsx");
+  const [fileName, setFileName] = useState("");
   const [text, setText] = useState("");
   const [err, setErr] = useState("");
 
   const [templates, setTemplates] = useState<
     { id: string; label: string; enabled: boolean }[]
   >([]);
-  const [formatId, setFormatId] = useState<string>("class-basic");
+  const [formatId, setFormatId] = useState<string>("");
 
   const [isRunning, setIsRunning] = useState(false);
 

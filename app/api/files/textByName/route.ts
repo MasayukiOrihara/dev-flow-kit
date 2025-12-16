@@ -59,9 +59,11 @@ export async function POST(req: Request) {
   }
   const absPath = path.join(INPUT_DIR, meta.savedPath);
 
+  console.log("コードファイル取得中...");
   // utf-8として読む（コード/仕様書前提）
   const text = await fs.readFile(absPath, "utf-8");
 
+  console.log("コード取得 → テキスト出力");
   return Response.json({
     file: {
       id: meta.id,

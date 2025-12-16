@@ -10,9 +10,14 @@ type Item = {
 };
 
 const items: Item[] = [
-  { href: "/tools/plan", label: "計画書生成", enabled: true },
-  { href: "/tools/classDesign", label: "クラス仕様書生成", enabled: true },
-  { href: "/tools/testCode", label: "テストコード生成", enabled: true },
+  { href: "/tools/plan", label: "計画書", enabled: false },
+  { href: "/tools/classDesign", label: "クラス仕様書", enabled: true },
+  {
+    href: "/tools/unitTestDesign",
+    label: "単体テスト仕様書",
+    enabled: true,
+  },
+  { href: "/tools/testCode", label: "テストコード", enabled: true },
   { href: "/tools/files", label: "ファイル管理", enabled: false },
 ];
 

@@ -1,4 +1,4 @@
-import FileUpdate from "../fileUpdate";
+import FileUpdate from "../file/fileUpdate";
 
 export default function TopFileBar() {
   return (
