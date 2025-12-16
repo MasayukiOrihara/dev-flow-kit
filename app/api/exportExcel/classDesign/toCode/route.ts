@@ -74,6 +74,8 @@ export async function POST(req: Request) {
     const chain = prompt.pipe(OpenAi41).pipe(parser);
     const response = await chain.invoke(promptVariables);
 
+    // todo: クラス仕様書エクセル出力
+
     console.log("ファイル解析完了 !");
     return Response.json(
       {

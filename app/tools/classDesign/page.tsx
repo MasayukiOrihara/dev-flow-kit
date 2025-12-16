@@ -49,6 +49,8 @@ export default function ClassDesignPage() {
     }
   };
 
+  // todo: 出力ボタン作成
+
   return (
     <div>
       <div>
@@ -57,7 +59,7 @@ export default function ClassDesignPage() {
       </div>
 
       <div className="my-4">
-        <h2>① コードから生成する</h2>
+        <h2>① コードから解析</h2>
         <div className="my-2">
           <h3 className="text-muted-foreground">
             生成元コードのファイル名を入力してください
