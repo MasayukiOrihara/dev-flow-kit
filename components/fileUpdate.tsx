@@ -77,7 +77,7 @@ export default function FileUpdate() {
               {f.name}
             </a>{" "}
             <small>
-              ({Math.round(f.size / 1024)}KB / {humanizeMime(f.mime)} /{" "}
+              ({Math.round(f.size / 1024)}KB / {humanizeMime(f.mime, f.name)} /{" "}
               {new Date(f.uploadedAt).toLocaleString()})
             </small>
             <Button
