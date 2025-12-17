@@ -1,5 +1,4 @@
 import { exportFile } from "@/lib/excel/exportFile";
-import { Payload } from "@/lib/excel/exportSpecToExcel";
 import { StructuredOutputParser } from "@langchain/core/output_parsers";
 import { PromptTemplate } from "@langchain/core/prompts";
 import { loadTemplateById } from "../../prompts/loadTemplateById/route";
@@ -10,6 +9,8 @@ import {
 } from "@/contents/schemas/testCase.schema";
 import { OpenAi41 } from "@/contents/models/openai.model";
 import { CHECK_ERROR, UNKNOWN_ERROR } from "@/contents/messages/error.message";
+import { Payload, TestType } from "@/contents/types/excel.type";
+import { buildWorkbook } from "@/lib/excel/exportSpecToExcel";
 
 export async function POST(req: Request) {
   try {
@@ -78,9 +79,13 @@ export async function POST(req: Request) {
     const chain = prompt.pipe(OpenAi41).pipe(parser);
     const response: TestCaseRow[] = await chain.invoke(promptVariables);
 
-    // Excel ファイル出力
+    // Excel ファイル作成
     const payload: Payload = { fileName: fileName, cases: response };
-    await exportFile(payload);
+    const type: TestType = "unit";
+    const wb = await buildWorkbook(payload, type);
+
+    // 出力
+    await exportFile(wb, fileName);
 
     console.log("ファイル解析完了 !");
     return Response.json(
