@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { postJson } from "@/lib/api/postJson.api";
 import { ExcelSheets } from "../unitTestDesign/page";
 import { useEffect, useState } from "react";
+import { postSSEJson } from "@/lib/api/postSSEJson";
 
 export default function TestCodePage() {
   const [excelFileName, setExcelFileName] = useState("");
@@ -57,17 +58,19 @@ export default function TestCodePage() {
 
       // 3) 結果生成
       setText("結果のファイルを生成しています...");
-      const outputRes = await postJson<{ message: string }>(
-        "/api/unitTestDesign",
-        {
-          fileName: codeFileName,
-          codeText: codeFileRes.text,
-          testDesign: excelFileRes.sheets,
-          formatId,
-        },
-        "生成に失敗しました"
-      );
-      setText(outputRes.message);
+      setText("");
+
+      const payload = {
+        fileName: codeFileName,
+        codeText: codeFileRes.text,
+        testDesign: excelFileRes.sheets,
+        formatId,
+      };
+      await postSSEJson("/api/jestTestCode", payload, (evt) => {
+        if (evt.type === "text-delta" && typeof evt.delta === "string") {
+          if (evt.delta) setText((prev) => prev + evt.delta);
+        }
+      });
     } catch (e: any) {
       console.error(e);
       setErr(e.message);
@@ -141,7 +144,9 @@ export default function TestCodePage() {
           </div>
 
           <h3 className="text-muted-foreground">解析結果</h3>
-          <pre className="p-3 overflow-auto whitespace-pre-wrap">{text}</pre>
+          <pre className="border rounded p-3 overflow-auto whitespace-pre-wrap">
+            {text}
+          </pre>
         </div>
       </div>
     </div>

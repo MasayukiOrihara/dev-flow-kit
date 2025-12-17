@@ -3,7 +3,8 @@ import { StringOutputParser } from "@langchain/core/output_parsers";
 import { PromptTemplate } from "@langchain/core/prompts";
 import { loadTemplateById } from "@/app/api/prompts/loadTemplateById/route";
 import { OpenAi41 } from "@/contents/models/openai.model";
-import { CHECK_ERROR, UNKNOWN_ERROR } from "@/contents/messages/error.message";
+import * as ERR from "@/contents/messages/error.message";
+import { reqString } from "@/lib/guard/api.guard";
 
 export const runtime = "nodejs";
 
@@ -15,34 +16,17 @@ export const runtime = "nodejs";
 export async function POST(req: Request) {
   try {
     const body = await req.json().catch(() => ({} as any));
+
+    /* === === ガード === === */
     // コードの取得
-    const codeText = body?.codeText;
-    // ガード：必須 & 文字列
-    if (typeof codeText !== "string" || codeText.trim() === "") {
-      return Response.json(
-        { error: "コードが取得できませんでした" },
-        { status: 400 }
-      );
-    }
-
+    const codeText = reqString(body, "codeText", ERR.CODETEXT_ERROR);
+    if (codeText instanceof Response) return codeText;
     // ファイル名の取得
-    const fileName = body?.fileName;
-    // ガード：必須 & 文字列
-    if (typeof fileName !== "string" || fileName.trim() === "") {
-      return Response.json(
-        { error: "ファイル名が取得できませんでした" },
-        { status: 400 }
-      );
-    }
-
+    const fileName = reqString(body, "fileName", ERR.FILENAME_ERROR);
+    if (fileName instanceof Response) return fileName;
     // プロンプトテンプレートの取得
-    const formatId = body?.formatId;
-    if (typeof formatId !== "string" || formatId.trim() === "") {
-      return Response.json(
-        { error: "テンプレートが選択されていません" },
-        { status: 400 }
-      );
-    }
+    const formatId = reqString(body, "formatId", ERR.TEMPLATE_ERROR);
+    if (formatId instanceof Response) return formatId;
 
     /* === === LLM === === */
     console.log("ファイル解析中...");
@@ -64,16 +48,11 @@ export async function POST(req: Request) {
     // todo: クラス仕様書エクセル出力
 
     console.log("ファイル解析完了 !");
-    return Response.json(
-      {
-        text: response,
-      },
-      { status: 200 }
-    );
+    return Response.json({ text: response }, { status: 200 });
   } catch (error) {
-    const message = error instanceof Error ? error.message : UNKNOWN_ERROR;
+    const message = error instanceof Error ? error.message : ERR.UNKNOWN_ERROR;
 
-    console.error(`${CHECK_ERROR}: ${message}`);
+    console.error(`${ERR.CHECK_ERROR}: ${message}`);
     return Response.json({ error: message }, { status: 500 });
   }
 }

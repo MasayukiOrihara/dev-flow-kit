@@ -1,19 +1,19 @@
-import { exportFile } from "@/lib/excel/exportFile";
+import * as ERR from "@/contents/messages/error.message";
+import { OpenAi41 } from "@/contents/models/openai.model";
+import { TestCaseRowArraySchema } from "@/contents/schemas/testCase.schema";
+import { reqObject, reqString } from "@/lib/guard/api.guard";
+import { toUIMessageStream } from "@ai-sdk/langchain";
 import { StructuredOutputParser } from "@langchain/core/output_parsers";
 import { PromptTemplate } from "@langchain/core/prompts";
-
-import { TEST_DESIGN_DIR } from "@/contents/parametars/file.parametar";
-import {
-  TestCaseRow,
-  TestCaseRowArraySchema,
-} from "@/contents/schemas/testCase.schema";
-import { OpenAi41 } from "@/contents/models/openai.model";
-import * as ERR from "@/contents/messages/error.message";
-import { Payload, TestType } from "@/contents/types/excel.type";
-import { buildWorkbook } from "@/lib/excel/exportSpecToExcel";
+import { createUIMessageStreamResponse } from "ai";
 import { loadTemplateById } from "../prompts/loadTemplateById/route";
-import { reqObject, reqString } from "@/lib/guard/api.guard";
+import { TEST_CODE_DIR } from "@/contents/parametars/file.parametar";
 
+/**
+ * テストコードを生成する
+ * @param req
+ * @returns
+ */
 export async function POST(req: Request) {
   try {
     const body = await req.json().catch(() => ({} as any));
@@ -32,41 +32,29 @@ export async function POST(req: Request) {
     const formatId = reqString(body, "formatId", ERR.TEMPLATE_ERROR);
     if (formatId instanceof Response) return formatId;
 
+    console.log(JSON.stringify(testDesign, null, 2));
+
     /* === === LLM === === */
     console.log("ファイル解析中...");
     // プロンプトの取得
-    const template = await loadTemplateById(formatId, TEST_DESIGN_DIR);
-
-    // パサーを作成
-    const parser = StructuredOutputParser.fromZodSchema(TestCaseRowArraySchema);
+    const template = await loadTemplateById(formatId, TEST_CODE_DIR);
 
     const prompt = PromptTemplate.fromTemplate(template);
     const promptVariables = {
       fileName: fileName,
       code: codeText,
-      testDesign: testDesign,
-      format_instructions: parser.getFormatInstructions(),
+      testDesign: JSON.stringify(testDesign, null, 2),
     };
-
     // LLM 応答
-    const chain = prompt.pipe(OpenAi41).pipe(parser);
-    const response: TestCaseRow[] = await chain.invoke(promptVariables);
+    const chain = prompt.pipe(OpenAi41);
+    const lcStream = await chain.stream(promptVariables);
 
-    /* === === Excel ファイル === === */
-    const payload: Payload = { fileName: fileName, cases: response };
-    const type: TestType = "unit";
-    const wb = await buildWorkbook(payload, type);
-
-    // 出力
-    await exportFile(wb, fileName);
-
+    const response = createUIMessageStreamResponse({
+      stream: toUIMessageStream(lcStream),
+    });
     console.log("ファイル解析完了 !");
-    return Response.json(
-      {
-        message: "ファイル解析完了しました。Excelファイルを確認してください。",
-      },
-      { status: 200 }
-    );
+
+    return response;
   } catch (error) {
     const message = error instanceof Error ? error.message : ERR.UNKNOWN_ERROR;
 
