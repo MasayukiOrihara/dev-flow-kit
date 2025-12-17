@@ -1,7 +1,7 @@
 import { exportFile } from "@/lib/excel/exportFile";
 import { StructuredOutputParser } from "@langchain/core/output_parsers";
 import { PromptTemplate } from "@langchain/core/prompts";
-import { loadTemplateById } from "../../prompts/loadTemplateById/route";
+
 import { TEST_DESIGN_DIR } from "@/contents/parametars/file.parametar";
 import {
   TestCaseRow,
@@ -11,6 +11,7 @@ import { OpenAi41 } from "@/contents/models/openai.model";
 import { CHECK_ERROR, UNKNOWN_ERROR } from "@/contents/messages/error.message";
 import { Payload, TestType } from "@/contents/types/excel.type";
 import { buildWorkbook } from "@/lib/excel/exportSpecToExcel";
+import { loadTemplateById } from "../prompts/loadTemplateById/route";
 
 export async function POST(req: Request) {
   try {

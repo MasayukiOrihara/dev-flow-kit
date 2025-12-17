@@ -51,7 +51,7 @@ export default function ClassDesignPage() {
 
       // 2) 結果生成
       const outputRes = await postJson<{ text: string }>(
-        "/api/exportExcel/classDesign/toCode",
+        "/api/classDesign/toCode",
         { fileName, codeText: fileRes.text, formatId },
         "生成に失敗しました"
       );

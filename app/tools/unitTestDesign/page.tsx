@@ -6,6 +6,10 @@ import { useEffect, useState } from "react";
 
 export type ExcelSheets = Record<string, any[][]>;
 
+/**
+ * 単体テスト仕様書作成ページ
+ * @returns
+ */
 export default function UnitTestDesignPage() {
   const [excelFileName, setExcelFileName] = useState("");
   const [codeFileName, setCodeFileName] = useState("");
@@ -59,7 +63,7 @@ export default function UnitTestDesignPage() {
       // 3) 結果生成
       setText("結果のファイルを生成しています...");
       const outputRes = await postJson<{ message: string }>(
-        "/api/exportExcel/unitTestDesign",
+        "/api/unitTestDesign",
         {
           fileName: codeFileName,
           codeText: codeFileRes.text,
