@@ -122,7 +122,7 @@ export default function TestCodePage() {
           <div className="flex flex-col gap-2">
             <div className="flex gap-2 my-2">
               <div>
-                <p className="text-sm font-bold">EXCELファイル</p>
+                <p className="text-sm font-bold">単体テスト仕様書（EXCEL）</p>
                 <input
                   className="border rounded px-2 py-1"
                   value={excelFileName}
