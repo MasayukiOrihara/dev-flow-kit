@@ -18,7 +18,7 @@ const items: Item[] = [
     enabled: true,
   },
   { href: "/tools/testCode", label: "テストコード", enabled: true },
-  { href: "/tools/files", label: "ファイル管理", enabled: false },
+  { href: "/tools/systemTestDesign", label: "総合テスト仕様書", enabled: true },
 ];
 
 export function ToolsSidebar() {

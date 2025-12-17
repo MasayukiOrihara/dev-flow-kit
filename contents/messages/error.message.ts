@@ -14,3 +14,5 @@ export const FILENAME_ERROR = "ファイル名が取得できませんでした"
 export const CODETEXT_ERROR = "コードが取得できませんでした";
 export const EXCELFILE_ERROR = "Excelファイルが取得できませんでした";
 export const TEMPLATE_ERROR = "テンプレートが選択されていません";
+
+export const FILE_READ_ERROR = "ファイルが読み込みできませんでした";

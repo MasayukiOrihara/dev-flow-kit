@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { FILE_READ_ERROR } from "@/contents/messages/error.message";
 import { postJson } from "@/lib/api/postJson.api";
 import { useEffect, useState } from "react";
 
@@ -48,7 +49,7 @@ export default function UnitTestDesignPage() {
       const excelFileRes = await postJson<{ sheets: ExcelSheets }>(
         "/api/files/excelToJsonByName",
         { fileName: excelFileName },
-        "ファイルが読み込みできませんでした"
+        FILE_READ_ERROR
       );
       setText("Excelファイルを読み込みました。");
 
@@ -56,7 +57,7 @@ export default function UnitTestDesignPage() {
       const codeFileRes = await postJson<{ text: string }>(
         "/api/files/textByName",
         { fileName: codeFileName },
-        "ファイルが読み込みできませんでした"
+        FILE_READ_ERROR
       );
       setText("コードファイルを読み込みました。");
 

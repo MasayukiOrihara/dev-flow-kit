@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { FILE_READ_ERROR } from "@/contents/messages/error.message";
 import { postJson } from "@/lib/api/postJson.api";
 import { useEffect, useState } from "react";
 
@@ -45,7 +46,7 @@ export default function ClassDesignPage() {
       const fileRes = await postJson<{ text: string }>(
         "/api/files/textByName",
         { fileName },
-        "ファイルが読み込みできませんでした"
+        FILE_READ_ERROR
       );
       setText(fileRes.text);
 

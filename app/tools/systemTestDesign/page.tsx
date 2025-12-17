@@ -4,12 +4,12 @@ import { Button } from "@/components/ui/button";
 import { postJson } from "@/lib/api/postJson.api";
 import { ExcelSheets } from "../unitTestDesign/page";
 import { useEffect, useState } from "react";
-import { postSSEJson } from "@/lib/api/postSSEJson";
 import { FILE_READ_ERROR } from "@/contents/messages/error.message";
 
-export default function TestCodePage() {
-  const [excelFileName, setExcelFileName] = useState("");
-  const [codeFileName, setCodeFileName] = useState("");
+export default function SystemTestDesignPage() {
+  const [functionFileName, setFunctionFileName] = useState("");
+  const [srsFileName, setSRSFileName] = useState("");
+  const [screenFileName, setScreenFileName] = useState("");
   const [text, setText] = useState("");
   const [err, setErr] = useState("");
 
@@ -22,7 +22,7 @@ export default function TestCodePage() {
 
   useEffect(() => {
     (async () => {
-      const res = await fetch("/api/prompts?kind=testCode");
+      const res = await fetch("/api/prompts?kind=testDesign");
       const json = await res.json().catch(() => ({}));
       setTemplates(json.templates ?? []);
       if ((json.templates ?? []).length && !formatId)
@@ -41,37 +41,43 @@ export default function TestCodePage() {
     setIsRunning(true);
 
     try {
-      // 1) エクセルファイル読み込み
-      const excelFileRes = await postJson<{ sheets: ExcelSheets }>(
+      // 1) 機能一覧表（EXCEL）読み込み
+      const functionFileRes = await postJson<{ sheets: ExcelSheets }>(
         "/api/files/excelToJsonByName",
-        { fileName: excelFileName },
+        { fileName: functionFileName },
         FILE_READ_ERROR
       );
-      setText("Excelファイルを読み込みました。");
+      setText("機能一覧表を読み込みました。");
 
-      // 2) コードファイル読み込み
-      const codeFileRes = await postJson<{ text: string }>(
+      // 2) 要求仕様書（TEXT）読み込み
+      const srsFileRes = await postJson<{ text: string }>(
         "/api/files/textByName",
-        { fileName: codeFileName },
+        { fileName: srsFileName },
         FILE_READ_ERROR
       );
-      setText("コードファイルを読み込みました。");
+      setText("要求仕様書を読み込みました。");
 
-      // 3) 結果生成
+      // 3) 画面仕様書（EXCEL）読み込み
+      const screenFileRes = await postJson<{ sheets: ExcelSheets }>(
+        "/api/files/excelToJsonByName",
+        { fileName: screenFileName },
+        FILE_READ_ERROR
+      );
+      setText("画面仕様書を読み込みました。");
+
+      // 4) 結果生成
       setText("結果のファイルを生成しています...");
-      setText("");
-
-      const payload = {
-        fileName: codeFileName,
-        codeText: codeFileRes.text,
-        testDesign: excelFileRes.sheets,
-        formatId,
-      };
-      await postSSEJson("/api/jestTestCode", payload, (evt) => {
-        if (evt.type === "text-delta" && typeof evt.delta === "string") {
-          if (evt.delta) setText((prev) => prev + evt.delta);
-        }
-      });
+      const outputRes = await postJson<{ message: string }>(
+        "/api/systemTestDesign",
+        {
+          functionFile: functionFileRes.sheets,
+          srsText: srsFileRes.text,
+          screenFile: screenFileRes.sheets,
+          formatId,
+        },
+        "生成に失敗しました"
+      );
+      setText(outputRes.message);
     } catch (e: any) {
       console.error(e);
       setErr(e.message);
@@ -82,33 +88,42 @@ export default function TestCodePage() {
   return (
     <div>
       <div>
-        <h1 className="text-xl font-semibold">JEST テストコード生成</h1>
-        <p className="text-muted-foreground">「JEST テストコード」を生成する</p>
+        <h1 className="text-xl font-semibold">総合テスト仕様書生成</h1>
+        <p className="text-muted-foreground">「総合テスト仕様書」を生成する</p>
       </div>
       <div>
-        <h2>〇 単体テスト仕様書（EXCEL）とコードから生成</h2>
+        <h2>〇 それぞれの仕様書（EXCEL）とコードから生成</h2>
 
         <div className="my-2">
           <h3 className="text-muted-foreground">
-            生成元コードのファイル名と使用するプロンプトを指定してください
+            生成元のファイル名と使用するプロンプトを指定してください
           </h3>
           <div className="flex flex-col gap-2">
             <div className="flex gap-2 my-2">
               <div>
-                <p className="text-sm font-bold">EXCELファイル</p>
+                <p className="text-sm font-bold">機能一覧表（EXCEL）</p>
                 <input
                   className="border rounded px-2 py-1"
-                  value={excelFileName}
-                  onChange={(e) => setExcelFileName(e.target.value)}
+                  value={functionFileName}
+                  onChange={(e) => setFunctionFileName(e.target.value)}
                 />
               </div>
 
               <div>
-                <p className="text-sm font-bold">コードファイル</p>
+                <p className="text-sm font-bold">要求仕様書（text）</p>
                 <input
                   className="border rounded px-2 py-1"
-                  value={codeFileName}
-                  onChange={(e) => setCodeFileName(e.target.value)}
+                  value={srsFileName}
+                  onChange={(e) => setSRSFileName(e.target.value)}
+                />
+              </div>
+
+              <div>
+                <p className="text-sm font-bold">画面仕様書（EXCEL）</p>
+                <input
+                  className="border rounded px-2 py-1"
+                  value={screenFileName}
+                  onChange={(e) => setScreenFileName(e.target.value)}
                 />
               </div>
             </div>
@@ -145,9 +160,7 @@ export default function TestCodePage() {
           </div>
 
           <h3 className="text-muted-foreground">解析結果</h3>
-          <pre className="border rounded p-3 overflow-auto whitespace-pre-wrap">
-            {text}
-          </pre>
+          <pre className="p-3 overflow-auto whitespace-pre-wrap">{text}</pre>
         </div>
       </div>
     </div>
