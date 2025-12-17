@@ -57,7 +57,7 @@ export async function POST(req: Request) {
       { status: 404 }
     );
   }
-  const absPath = path.join(INPUT_DIR, meta.savedPath);
+  const absPath = meta.savedPath;
 
   console.log("コードファイル取得中...");
   // utf-8として読む（コード/仕様書前提）

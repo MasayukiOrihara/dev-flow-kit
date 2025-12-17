@@ -91,7 +91,7 @@ export async function POST(req: Request) {
       { status: 404 }
     );
   }
-  const absPath = path.join(INPUT_DIR, meta.savedPath);
+  const absPath = meta.savedPath;
 
   console.log("エクセルファイル取得中...");
   // ExcelはBufferで読む

@@ -2,14 +2,21 @@ import fs from "fs";
 import path from "path";
 import { buildWorkbook, Payload } from "./exportSpecToExcel";
 import { OUTPUT_DIR } from "@/contents/parametars/file.parametar";
+import { FileMeta } from "@/contents/types/file.type";
+import { safeFileName } from "../files/safeFileName.file";
+import { EXCEL_MINE } from "@/contents/messages/mine.message";
+import { readMeta, writeMeta } from "../files/meta.file";
 
 export async function exportFile(payload: Payload) {
   const wb = await buildWorkbook(payload);
 
+  // 保存名を決定
   const dir = path.resolve(OUTPUT_DIR); // 保存ディレクトリ
-  const baseName = `${payload.fileName}-testspec`;
+  const baseName = `${safeFileName(payload.fileName)}-testspec`;
   const ext = ".xlsx";
-  let outPath = path.join(dir, `${baseName}${ext}`);
+
+  const name = `${baseName}${ext}`;
+  let outPath = path.join(dir, name);
 
   // 同名ファイルが存在する場合は連番付与
   let index = 1;
@@ -19,5 +26,23 @@ export async function exportFile(payload: Payload) {
     index++;
   }
   await wb.xlsx.writeFile(outPath); // ← これで保存完了
+
+  // ここでmeta情報に記録
+  const metaList = await readMeta();
+  const id = crypto.randomUUID();
+  const buf = await wb.xlsx.writeBuffer();
+
+  const meta: FileMeta = {
+    id,
+    name,
+    size: buf.byteLength,
+    mime: EXCEL_MINE,
+    savedPath: outPath,
+    uploadedAt: new Date().toISOString(),
+  };
+
+  metaList.unshift(meta);
+  await writeMeta(metaList); // 書き込み
+
   console.log(`✅ Excel出力完了: ${outPath}`);
 }

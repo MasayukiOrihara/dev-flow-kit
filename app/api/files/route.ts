@@ -6,6 +6,7 @@ import { ensureDirs } from "@/lib/files/ensureDirs.file";
 import { readMeta, writeMeta } from "@/lib/files/meta.file";
 import { safeFileName } from "@/lib/files/safeFileName.file";
 import { INPUT_DIR } from "@/contents/parametars/file.parametar";
+import { DEFAULT_MINE } from "@/contents/messages/mine.message";
 
 // fsを使うのでNode runtime
 export const runtime = "nodejs";
@@ -43,8 +44,8 @@ export async function POST(req: Request) {
       id,
       name,
       size: buf.length,
-      mime: item.type || "application/octet-stream",
-      savedPath,
+      mime: item.type || DEFAULT_MINE,
+      savedPath: absPath,
       uploadedAt: new Date().toISOString(),
     };
 

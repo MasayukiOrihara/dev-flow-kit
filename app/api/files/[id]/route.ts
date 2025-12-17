@@ -19,7 +19,7 @@ export async function GET(
     return Response.json({ error: "not found" }, { status: 404 });
   }
 
-  const absPath = path.join(INPUT_DIR, meta.savedPath);
+  const absPath = meta.savedPath;
   const buf = await fs.readFile(absPath);
 
   // ブラウザで開ける/ダウンロードできる形で返す
@@ -49,7 +49,7 @@ export async function DELETE(
   if (!meta.savedPath) {
     return Response.json({ error: "not found" }, { status: 404 });
   }
-  const absPath = path.join(INPUT_DIR, meta.savedPath);
+  const absPath = meta.savedPath;
 
   // 1) 実体削除（無くてもOK扱いにする）
   try {

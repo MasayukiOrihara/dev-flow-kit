@@ -62,7 +62,12 @@ export default function FileUpdate() {
 
   return (
     <main className="px-8 py-4">
-      <h1>Dev Flow Kit - ファイル選択</h1>
+      <div className="flex items-center">
+        <h1>Dev Flow Kit - ファイル選択</h1>
+        <Button variant="outline" size="sm" onClick={load} className="ml-2">
+          {"更新"}
+        </Button>
+      </div>
 
       <div className="m-3 text-xs text-zinc-500">
         <FileSelectButton onUpload={onUpload} />
@@ -70,27 +75,29 @@ export default function FileUpdate() {
       </div>
 
       <h2>アップロード済みファイル</h2>
-      <ul className="text-sm whitespace-nowrap overflow-hidden text-ellipsis">
-        {files.map((f) => (
-          <li key={f.id}>
-            <a href={`/api/files/${f.id}`} target="_blank" rel="noreferrer">
-              {f.name}
-            </a>{" "}
-            <small>
-              ({Math.round(f.size / 1024)}KB / {humanizeMime(f.mime, f.name)} /{" "}
-              {new Date(f.uploadedAt).toLocaleString()})
-            </small>
-            <Button
-              variant="default"
-              size="xs"
-              onClick={() => onDelete(f.id)}
-              className="hover:bg-red-500 ml-2"
-            >
-              削除
-            </Button>
-          </li>
-        ))}
-      </ul>
+      <div className="max-h-18 overflow-y-auto">
+        <ul className="text-sm">
+          {files.map((f) => (
+            <li key={f.id}>
+              <a href={`/api/files/${f.id}`} target="_blank" rel="noreferrer">
+                {f.name}
+              </a>{" "}
+              <small>
+                ({Math.round(f.size / 1024)}KB / {humanizeMime(f.mime, f.name)}{" "}
+                / {new Date(f.uploadedAt).toLocaleString()})
+              </small>
+              <Button
+                variant="default"
+                size="xs"
+                onClick={() => onDelete(f.id)}
+                className="hover:bg-red-500 ml-2"
+              >
+                削除
+              </Button>
+            </li>
+          ))}
+        </ul>
+      </div>
     </main>
   );
 }

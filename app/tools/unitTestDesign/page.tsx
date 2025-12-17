@@ -7,17 +7,15 @@ import { useEffect, useState } from "react";
 export type ExcelSheets = Record<string, any[][]>;
 
 export default function UnitTestDesignPage() {
-  const [excelFileName, setExcelFileName] = useState(
-    "contentListItem.tsx-testspec.xlsx"
-  );
-  const [codeFileName, setCodeFileName] = useState("CurriculumDetail.tsx");
+  const [excelFileName, setExcelFileName] = useState("");
+  const [codeFileName, setCodeFileName] = useState("");
   const [text, setText] = useState("");
   const [err, setErr] = useState("");
 
   const [templates, setTemplates] = useState<
     { id: string; label: string; enabled: boolean }[]
   >([]);
-  const [formatId, setFormatId] = useState<string>("unit-test-to-json");
+  const [formatId, setFormatId] = useState<string>("");
 
   const [isRunning, setIsRunning] = useState(false);
 
