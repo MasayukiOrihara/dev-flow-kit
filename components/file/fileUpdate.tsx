@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "../ui/button";
 import { FileSelectButton } from "./fileSelectButton";
 import { FileMeta } from "@/contents/types/file.type";
@@ -9,6 +9,9 @@ import { humanizeMime } from "@/lib/files/humanizeMime.file";
 export default function FileUpdate() {
   const [files, setFiles] = useState<FileMeta[]>([]);
   const [uploading, setUploading] = useState(false);
+
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+  const timersRef = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
 
   /**
    * ファイルロード処理
@@ -60,6 +63,23 @@ export default function FileUpdate() {
     await load();
   };
 
+  /**
+   * コピーハンドラ
+   * @param text
+   */
+  const copyToClipboard = async (id: string, name: string) => {
+    await navigator.clipboard.writeText(name);
+    setCopiedId(id);
+
+    // 連打対応：既存タイマーがあれば消して、時間をリセット
+    if (timersRef.current[id]) clearTimeout(timersRef.current[id]);
+
+    timersRef.current[id] = setTimeout(() => {
+      setCopiedId((prev) => (prev === id ? null : prev));
+      delete timersRef.current[id];
+    }, 1200);
+  };
+
   return (
     <main className="px-8 py-4">
       <div className="flex items-center">
@@ -86,6 +106,14 @@ export default function FileUpdate() {
                 ({Math.round(f.size / 1024)}KB / {humanizeMime(f.mime, f.name)}{" "}
                 / {new Date(f.uploadedAt).toLocaleString()})
               </small>
+              <Button
+                variant="outline"
+                size="xs"
+                onClick={() => copyToClipboard(f.id, f.name)}
+                className="shrink-0 ml-2"
+              >
+                {copiedId === f.id ? "済" : "コピー"}
+              </Button>
               <Button
                 variant="default"
                 size="xs"
