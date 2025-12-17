@@ -1,6 +1,6 @@
 // lib/exportSpecToExcel.ts
+import { TestCaseRow } from "@/contents/schemas/testCase.schema";
 import ExcelJS from "exceljs";
-import { ComprehensiveTestCaseRow, TestCaseRow } from "../schema";
 
 //export type Payload = { fileName: string; cases: ComprehensiveTestCaseRow[] };
 export type Payload = { fileName: string; cases: TestCaseRow[] };

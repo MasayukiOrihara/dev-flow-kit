@@ -1,8 +1,10 @@
-import { CHECK_ERROR, UNKNOWN_ERROR, URL_ERROR } from "@/lib/messages";
-import { OpenAi41 } from "@/lib/models";
-import { TestCaseRowArraySchema } from "@/lib/schema";
-import { COMPONENT_ANALYZE_TEMPLATE, GRAPH_ANALYZE_TEMPLATE, MODULE_ANALYZE_TEMPLATE, NODE_ANALYZE_TEMPLATE, SERVICE_ANALYZE_TEMPLATE, TYPE_ANALYZE_TEMPLATE } from "@/lib/template/class-template";
-import { TEST_CODE_GENERATE_TEMPLATE } from "@/lib/template/test-template";
+import {
+  CHECK_ERROR,
+  UNKNOWN_ERROR,
+  URL_ERROR,
+} from "@/contents/messages/error.message";
+import { OpenAi41 } from "@/contents/models/openai.model";
+import { TestCaseRowArraySchema } from "@/contents/schemas/testCase.schema";
 import { messageText } from "@/lib/utils";
 import { toUIMessageStream } from "@ai-sdk/langchain";
 import { StructuredOutputParser } from "@langchain/core/output_parsers";
@@ -13,7 +15,7 @@ import { readFileSync } from "fs";
 export const SCENARIO_PATH = "public/markdowns/";
 export const MARKDOWN_READ_API = "/api/markdown/read";
 
-export const FILE_PATH = "public/files/"
+export const FILE_PATH = "public/files/";
 
 export async function POST(req: Request) {
   try {
@@ -31,11 +33,10 @@ export async function POST(req: Request) {
     //現在の履歴 {input}用
     const currentMessage = messages[messages.length - 1];
     const file = messageText(currentMessage);
-    
+
     // 問題内容の取得
     const dir = FILE_PATH;
-    const text = readFileSync(`${dir}${file}`, 'utf8');
-
+    const text = readFileSync(`${dir}${file}`, "utf8");
 
     /* === === LLM === === */
     console.log("ファイル解析中...");
@@ -47,11 +48,11 @@ export async function POST(req: Request) {
     // const template = NODE_ANALYZE_TEMPLATE;
     // const template = TYPE_ANALYZE_TEMPLATE;
     // const template = TEST_ANALYZE_TEMPLATE;
-    const template = TEST_CODE_GENERATE_TEMPLATE;
+    const template = "TEST_CODE_GENERATE_TEMPLATE";
 
     // パサーを作成
     const parser = StructuredOutputParser.fromZodSchema(TestCaseRowArraySchema);
-    
+
     const prompt = PromptTemplate.fromTemplate(template);
     const promptVariables = {
       fileName: file,

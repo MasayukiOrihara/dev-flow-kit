@@ -1,18 +1,16 @@
-import { exportFile } from "@/lib/excel/exportFile";
-import { Payload } from "@/lib/excel/exportSpecToExcel";
-import { CHECK_ERROR, UNKNOWN_ERROR, URL_ERROR } from "@/lib/messages";
-import { OpenAi41 } from "@/lib/models";
 import {
-  ComprehensiveTestCaseRow,
-  ComprehensiveTestCaseRowArraySchema,
-  ComprehensiveTestCaseRowSchema,
+  CHECK_ERROR,
+  UNKNOWN_ERROR,
+  URL_ERROR,
+} from "@/contents/messages/error.message";
+import { OpenAi41 } from "@/contents/models/openai.model";
+import {
   TestCaseRow,
   TestCaseRowArraySchema,
-} from "@/lib/schema";
-import {
-  COMPREHENSIVE_TEST_OUTPUT_EMPLATE,
-  TEST_ANALYZE_OUTPUT_TEMPLATE,
-} from "@/lib/template/test-template";
+} from "@/contents/schemas/testCase.schema";
+import { exportFile } from "@/lib/excel/exportFile";
+import { Payload } from "@/lib/excel/exportSpecToExcel";
+
 import { messageText } from "@/lib/utils";
 import { StructuredOutputParser } from "@langchain/core/output_parsers";
 import { PromptTemplate } from "@langchain/core/prompts";
@@ -54,7 +52,7 @@ export async function POST(req: Request) {
     /* === === LLM === === */
     console.log("ファイル解析中...");
     // プロンプトの取得
-    const template = TEST_ANALYZE_OUTPUT_TEMPLATE;
+    const template = "TEST_ANALYZE_OUTPUT_TEMPLATE";
     // const template = COMPREHENSIVE_TEST_OUTPUT_EMPLATE;
 
     // パサーを作成

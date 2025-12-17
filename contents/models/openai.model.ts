@@ -1,14 +1,4 @@
 import { ChatOpenAI } from "@langchain/openai";
-import {
-  CommaSeparatedListOutputParser,
-  StringOutputParser,
-  JsonOutputParser,
-} from "@langchain/core/output_parsers";
-
-// ぱさー
-export const strParser = new StringOutputParser();
-export const listParser = new CommaSeparatedListOutputParser();
-export const jsonParser = new JsonOutputParser();
 
 // opebAIモデル（4o）
 export const OpenAi4o = new ChatOpenAI({

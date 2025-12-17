@@ -1,9 +1,9 @@
 import { CLASS_DESIGN_DIR } from "@/contents/parametars/file.parametar";
-import { CHECK_ERROR, UNKNOWN_ERROR } from "@/lib/messages";
-import { OpenAi41 } from "@/lib/models";
 import { StringOutputParser } from "@langchain/core/output_parsers";
 import { PromptTemplate } from "@langchain/core/prompts";
 import { loadTemplateById } from "@/app/api/prompts/loadTemplateById/route";
+import { OpenAi41 } from "@/contents/models/openai.model";
+import { CHECK_ERROR, UNKNOWN_ERROR } from "@/contents/messages/error.message";
 
 export const runtime = "nodejs";
 

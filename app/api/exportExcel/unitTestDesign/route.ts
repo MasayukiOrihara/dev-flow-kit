@@ -1,16 +1,15 @@
 import { exportFile } from "@/lib/excel/exportFile";
 import { Payload } from "@/lib/excel/exportSpecToExcel";
-import { CHECK_ERROR, UNKNOWN_ERROR, URL_ERROR } from "@/lib/messages";
-import { OpenAi41 } from "@/lib/models";
-import { TestCaseRow, TestCaseRowArraySchema } from "@/lib/schema";
-import { TEST_ANALYZE_OUTPUT_TEMPLATE } from "@/lib/template/test-template";
-import { messageText } from "@/lib/utils";
 import { StructuredOutputParser } from "@langchain/core/output_parsers";
 import { PromptTemplate } from "@langchain/core/prompts";
-import { UIMessage } from "ai";
-import { readFileSync } from "fs";
 import { loadTemplateById } from "../../prompts/loadTemplateById/route";
 import { TEST_DESIGN_DIR } from "@/contents/parametars/file.parametar";
+import {
+  TestCaseRow,
+  TestCaseRowArraySchema,
+} from "@/contents/schemas/testCase.schema";
+import { OpenAi41 } from "@/contents/models/openai.model";
+import { CHECK_ERROR, UNKNOWN_ERROR } from "@/contents/messages/error.message";
 
 export async function POST(req: Request) {
   try {
