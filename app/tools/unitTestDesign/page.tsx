@@ -46,6 +46,7 @@ export default function UnitTestDesignPage() {
         { fileName: excelFileName },
         "ファイルが読み込みできませんでした"
       );
+      setText("Excelファイルを読み込みました。");
 
       // 2) コードファイル読み込み
       const codeFileRes = await postJson<{ text: string }>(
@@ -53,9 +54,11 @@ export default function UnitTestDesignPage() {
         { fileName: codeFileName },
         "ファイルが読み込みできませんでした"
       );
+      setText("コードファイルを読み込みました。");
 
       // 3) 結果生成
-      const outputRes = await postJson<{ text: string }>(
+      setText("結果のファイルを生成しています...");
+      const outputRes = await postJson<{ message: string }>(
         "/api/exportExcel/unitTestDesign",
         {
           fileName: codeFileName,
@@ -65,7 +68,7 @@ export default function UnitTestDesignPage() {
         },
         "生成に失敗しました"
       );
-      setText(outputRes.text);
+      setText(outputRes.message);
     } catch (e: any) {
       console.error(e);
       setErr(e.message);
@@ -139,9 +142,7 @@ export default function UnitTestDesignPage() {
           </div>
 
           <h3 className="text-muted-foreground">解析結果</h3>
-          <pre className="border rounded p-3 overflow-auto whitespace-pre-wrap">
-            {text}
-          </pre>
+          <pre className="p-3 overflow-auto whitespace-pre-wrap">{text}</pre>
         </div>
       </div>
     </div>
