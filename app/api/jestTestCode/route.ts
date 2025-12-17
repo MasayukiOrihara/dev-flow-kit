@@ -1,9 +1,7 @@
 import * as ERR from "@/contents/messages/error.message";
 import { OpenAi41 } from "@/contents/models/openai.model";
-import { TestCaseRowArraySchema } from "@/contents/schemas/testCase.schema";
 import { reqObject, reqString } from "@/lib/guard/api.guard";
 import { toUIMessageStream } from "@ai-sdk/langchain";
-import { StructuredOutputParser } from "@langchain/core/output_parsers";
 import { PromptTemplate } from "@langchain/core/prompts";
 import { createUIMessageStreamResponse } from "ai";
 import { loadTemplateById } from "../prompts/loadTemplateById/route";

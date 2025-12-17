@@ -1,72 +1,25 @@
 // app/api/excel-to-json-by-name/route.ts
-import { INPUT_DIR } from "@/contents/parametars/file.parametar";
 import { readMeta } from "@/lib/files/meta.file";
 import fs from "node:fs/promises";
-import path from "node:path";
 import ExcelJS from "exceljs";
+import { badRequest, notFound, reqString } from "@/lib/guard/api.guard";
+import * as ERR from "@/contents/messages/error.message";
+import { isProbablyExcelFile } from "@/lib/files/isProbablyExcelFile.file";
+import { normalizeCellValue } from "@/lib/files/normalizeCellValue.file";
 
 export const runtime = "nodejs";
 
-function isProbablyExcelFile(name: string, mime: string) {
-  // mimeがoctet-streamでも拡張子で判断できるようにする
-  if (
-    mime ===
-      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ||
-    mime === "application/vnd.ms-excel"
-  ) {
-    return true;
-  }
-  return /\.(xlsx|xls)$/i.test(name);
-}
-
-// ExcelJSの cell.value はオブジェクトになることがあるので正規化（必要最低限）
-function normalizeCellValue(v: any) {
-  if (v == null) return null;
-
-  // Date
-  if (v instanceof Date) return v.toISOString();
-
-  // Formula: { formula, result }
-  if (typeof v === "object" && "formula" in v) {
-    return v.result ?? null; // 必要なら { formula: v.formula, result: v.result }
-  }
-
-  // Hyperlink: { text, hyperlink }
-  if (typeof v === "object" && "hyperlink" in v) {
-    return v.text ?? v.hyperlink;
-  }
-
-  // RichText: { richText: [...] }
-  if (typeof v === "object" && "richText" in v) {
-    return v.richText?.map((r: any) => r.text).join("") ?? "";
-  }
-
-  return v; // number/string/boolean など
-}
-
 export async function POST(req: Request) {
   const body = await req.json().catch(() => ({} as any));
-  const fileName = body?.fileName;
 
-  // ガード：必須 & 文字列
-  if (typeof fileName !== "string" || fileName.trim() === "") {
-    return Response.json(
-      { error: "ファイル名が取得できませんでした" },
-      { status: 400 }
-    );
-  }
+  const fileName = reqString(body, "fileName", ERR.FILENAME_ERROR);
+  if (fileName instanceof Response) return fileName;
 
   // ファイル一覧を取得
   const list = await readMeta();
-
   // 同名が複数ある可能性があるので最新(uploadedAtが新しい)を優先
   const candidates = list.filter((m) => m.name === fileName);
-  if (candidates.length === 0) {
-    return Response.json(
-      { error: "ファイルが見つかりませんでした" },
-      { status: 404 }
-    );
-  }
+  if (candidates.length === 0) return notFound(ERR.NOT_FOUND_ERROR);
 
   // ファイル情報の取得
   const meta = candidates
@@ -74,23 +27,12 @@ export async function POST(req: Request) {
     .sort((a, b) => (a.uploadedAt < b.uploadedAt ? 1 : -1))[0];
 
   if (!isProbablyExcelFile(meta.name, meta.mime)) {
-    return Response.json(
-      {
-        error: "Excelファイルではありませんでした",
-        mime: meta.mime,
-        name: meta.name,
-      },
-      { status: 400 }
-    );
+    return badRequest(ERR.NOT_EXCEL_ERROR);
   }
 
   // ファイルの取得
-  if (!meta.savedPath) {
-    return Response.json(
-      { error: "ファイルが見つかりませんでした" },
-      { status: 404 }
-    );
-  }
+  if (!meta.savedPath) return notFound(ERR.NOT_FOUND_ERROR);
+
   const absPath = meta.savedPath;
 
   console.log("エクセルファイル取得中...");

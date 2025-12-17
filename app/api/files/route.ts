@@ -7,6 +7,8 @@ import { readMeta, writeMeta } from "@/lib/files/meta.file";
 import { safeFileName } from "@/lib/files/safeFileName.file";
 import { INPUT_DIR } from "@/contents/parametars/file.parametar";
 import { DEFAULT_MINE } from "@/contents/messages/mine.message";
+import { notFound } from "@/lib/guard/api.guard";
+import { NOT_FOUND_ERROR } from "@/contents/messages/error.message";
 
 // fsを使うのでNode runtime
 export const runtime = "nodejs";
@@ -22,9 +24,7 @@ export async function POST(req: Request) {
   const form = await req.formData();
   const files = form.getAll("files");
   // ガード
-  if (!files.length) {
-    return Response.json({ error: "files is required" }, { status: 400 });
-  }
+  if (!files.length) return notFound(NOT_FOUND_ERROR);
 
   const metaList = await readMeta();
   const saved: FileMeta[] = [];

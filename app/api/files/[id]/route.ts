@@ -1,11 +1,17 @@
-import { INPUT_DIR } from "@/contents/parametars/file.parametar";
+import { NOT_FOUND_ERROR } from "@/contents/messages/error.message";
 import { ensureDirs } from "@/lib/files/ensureDirs.file";
 import { readMeta, writeMeta } from "@/lib/files/meta.file";
+import { notFound } from "@/lib/guard/api.guard";
 import fs from "node:fs/promises";
-import path from "node:path";
 
 export const runtime = "nodejs";
 
+/**
+ * ファイル取得
+ * @param _req
+ * @param ctx
+ * @returns
+ */
 export async function GET(
   _req: Request,
   ctx: { params: Promise<{ id: string }> }
@@ -15,9 +21,7 @@ export async function GET(
   const list = await readMeta();
   const meta = list.find((m) => m.id === id);
 
-  if (!meta || !meta.savedPath) {
-    return Response.json({ error: "not found" }, { status: 404 });
-  }
+  if (!meta || !meta.savedPath) return notFound(NOT_FOUND_ERROR);
 
   const absPath = meta.savedPath;
   const buf = await fs.readFile(absPath);
@@ -33,6 +37,12 @@ export async function GET(
   });
 }
 
+/**
+ * ファイル削除
+ * @param _req
+ * @param ctx
+ * @returns
+ */
 export async function DELETE(
   _req: Request,
   ctx: { params: Promise<{ id: string }> }
@@ -43,12 +53,11 @@ export async function DELETE(
   const list = await readMeta();
   const idx = list.findIndex((m) => m.id === id);
 
-  if (idx === -1) return Response.json({ error: "not found" }, { status: 404 });
+  if (idx === -1) return notFound(NOT_FOUND_ERROR);
 
   const meta = list[idx];
-  if (!meta.savedPath) {
-    return Response.json({ error: "not found" }, { status: 404 });
-  }
+  if (!meta.savedPath) return notFound(NOT_FOUND_ERROR);
+
   const absPath = meta.savedPath;
 
   // 1) 実体削除（無くてもOK扱いにする）
