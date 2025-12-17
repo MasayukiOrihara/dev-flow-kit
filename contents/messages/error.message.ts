@@ -16,3 +16,4 @@ export const EXCELFILE_ERROR = "Excelファイルが取得できませんでし�
 export const TEMPLATE_ERROR = "テンプレートが選択されていません";
 
 export const FILE_READ_ERROR = "ファイルが読み込みできませんでした";
+export const NOT_FOUND_CODE_ERROR = "コードブロックが見つかりません";

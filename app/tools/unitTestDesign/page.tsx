@@ -68,7 +68,7 @@ export default function UnitTestDesignPage() {
         {
           fileName: codeFileName,
           codeText: codeFileRes.text,
-          testDesign: excelFileRes.sheets,
+          classDesign: excelFileRes.sheets,
           formatId,
         },
         "生成に失敗しました"
@@ -81,6 +81,7 @@ export default function UnitTestDesignPage() {
       setIsRunning(false);
     }
   };
+
   return (
     <div>
       <div>
@@ -97,7 +98,7 @@ export default function UnitTestDesignPage() {
           <div className="flex flex-col gap-2">
             <div className="flex gap-2 my-2">
               <div>
-                <p className="text-sm font-bold">EXCELファイル</p>
+                <p className="text-sm font-bold">クラス仕様書（EXCEL）</p>
                 <input
                   className="border rounded px-2 py-1"
                   value={excelFileName}
@@ -106,7 +107,7 @@ export default function UnitTestDesignPage() {
               </div>
 
               <div>
-                <p className="text-sm font-bold">コードファイル</p>
+                <p className="text-sm font-bold">対象コードファイル</p>
                 <input
                   className="border rounded px-2 py-1"
                   value={codeFileName}

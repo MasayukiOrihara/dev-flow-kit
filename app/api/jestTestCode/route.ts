@@ -30,8 +30,6 @@ export async function POST(req: Request) {
     const formatId = reqString(body, "formatId", ERR.TEMPLATE_ERROR);
     if (formatId instanceof Response) return formatId;
 
-    console.log(JSON.stringify(testDesign, null, 2));
-
     /* === === LLM === === */
     console.log("ファイル解析中...");
     // プロンプトの取得

@@ -79,6 +79,33 @@ export default function TestCodePage() {
       setIsRunning(false);
     }
   };
+
+  /**
+   * テストコードをファイルで出力
+   * @returns
+   */
+  const exportCode = async () => {
+    if (isRunning) return;
+    setErr("");
+    setIsRunning(true);
+
+    try {
+      // 出力
+      const res = await postJson<{ fileName: string }>(
+        "/api/jestTestCode/exportTSCode",
+        { llmText: text },
+        FILE_READ_ERROR
+      );
+
+      setText(`${res.fileName} を 出力しました`);
+    } catch (e: any) {
+      console.error(e);
+      setErr(e.message);
+    } finally {
+      setIsRunning(false);
+    }
+  };
+
   return (
     <div>
       <div>
@@ -137,6 +164,17 @@ export default function TestCodePage() {
               >
                 {isRunning ? "処理中..." : "読み込み→生成"}
               </Button>
+
+              {text.length > 0 ? (
+                <Button
+                  variant="outline"
+                  onClick={exportCode}
+                  disabled={isRunning}
+                  className="hover:bg-blue-600 ml-2"
+                >
+                  {isRunning ? "処理中..." : "TS コード出力"}
+                </Button>
+              ) : null}
             </div>
 
             {err ? (

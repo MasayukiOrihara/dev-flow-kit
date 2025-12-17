@@ -26,8 +26,12 @@ export async function POST(req: Request) {
     const codeText = reqString(body, "codeText", ERR.CODETEXT_ERROR);
     if (codeText instanceof Response) return codeText;
     // excelファイルの取得
-    const testDesign = reqObject<any>(body, "testDesign", ERR.EXCELFILE_ERROR);
-    if (testDesign instanceof Response) return testDesign;
+    const classDesign = reqObject<any>(
+      body,
+      "classDesign",
+      ERR.EXCELFILE_ERROR
+    );
+    if (classDesign instanceof Response) return classDesign;
     // プロンプトテンプレートの取得
     const formatId = reqString(body, "formatId", ERR.TEMPLATE_ERROR);
     if (formatId instanceof Response) return formatId;
@@ -44,7 +48,7 @@ export async function POST(req: Request) {
     const promptVariables = {
       fileName: fileName,
       code: codeText,
-      testDesign: testDesign,
+      classDesign: JSON.stringify(classDesign, null, 2),
       format_instructions: parser.getFormatInstructions(),
     };
 

@@ -3,17 +3,11 @@ import { OpenAi41 } from "@/contents/models/openai.model";
 import {
   ComprehensiveTestCaseRow,
   ComprehensiveTestCaseRowArraySchema,
-  TestCaseRow,
-  TestCaseRowArraySchema,
 } from "@/contents/schemas/testCase.schema";
 import { exportFile } from "@/lib/excel/exportFile";
 import { reqObject, reqString } from "@/lib/guard/api.guard";
-
-import { messageText } from "@/lib/utils";
 import { StructuredOutputParser } from "@langchain/core/output_parsers";
 import { PromptTemplate } from "@langchain/core/prompts";
-import { UIMessage } from "ai";
-import { readFileSync } from "fs";
 import { loadTemplateById } from "../prompts/loadTemplateById/route";
 import { TEST_DESIGN_DIR } from "@/contents/parametars/file.parametar";
 import { Payload, TestType } from "@/contents/types/excel.type";
@@ -21,6 +15,11 @@ import { buildWorkbook } from "@/lib/excel/exportSpecToExcel";
 
 const SYSTEM_TEST_NAME = "system-test";
 
+/**
+ * 総合テスト仕様書生成
+ * @param req
+ * @returns
+ */
 export async function POST(req: Request) {
   try {
     const body = await req.json().catch(() => ({} as any));
