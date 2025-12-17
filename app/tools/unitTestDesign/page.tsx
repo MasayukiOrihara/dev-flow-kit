@@ -83,7 +83,7 @@ export default function UnitTestDesignPage() {
         <p className="text-muted-foreground">「単体テスト仕様書」を生成する</p>
       </div>
       <div>
-        <h2>〇 クラス仕様書とコードから生成</h2>
+        <h2>〇 クラス仕様書（EXCEL）とコードから生成</h2>
 
         <div className="my-2">
           <h3 className="text-muted-foreground">
@@ -92,7 +92,7 @@ export default function UnitTestDesignPage() {
           <div className="flex flex-col gap-2">
             <div className="flex gap-2 my-2">
               <div>
-                <p className="text-sm font-bold">エクセルファイル</p>
+                <p className="text-sm font-bold">EXCELファイル</p>
                 <input
                   className="border rounded px-2 py-1"
                   value={excelFileName}
