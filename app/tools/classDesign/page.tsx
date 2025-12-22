@@ -1,72 +1,15 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { GenerateSection } from "@/components/generateSection";
 import { FILE_READ_ERROR } from "@/contents/messages/error.message";
 import { postJson } from "@/lib/api/postJson.api";
-import { useEffect, useState } from "react";
+import { ExcelSheets } from "../unitTestDesign/page";
 
 /**
  * クラス仕様書生成ページ
  * @returns
  */
 export default function ClassDesignPage() {
-  const [fileName, setFileName] = useState("");
-  const [text, setText] = useState("");
-  const [err, setErr] = useState("");
-
-  const [templates, setTemplates] = useState<
-    { id: string; label: string; enabled: boolean }[]
-  >([]);
-  const [formatId, setFormatId] = useState<string>("");
-
-  const [isRunning, setIsRunning] = useState(false);
-
-  useEffect(() => {
-    (async () => {
-      const res = await fetch("/api/prompts?kind=classDesign");
-      const json = await res.json().catch(() => ({}));
-      setTemplates(json.templates ?? []);
-      if ((json.templates ?? []).length && !formatId)
-        setFormatId(json.templates[0].id);
-    })();
-  }, []);
-
-  /**
-   * ファイルの読み込み
-   * @returns
-   */
-  const load = async () => {
-    if (isRunning) return;
-    setErr("");
-    setText("");
-    setIsRunning(true);
-
-    try {
-      // 1) 読み込み
-      const fileRes = await postJson<{ text: string }>(
-        "/api/files/textByName",
-        { fileName },
-        FILE_READ_ERROR
-      );
-      setText(fileRes.text);
-
-      // 2) 結果生成
-      const outputRes = await postJson<{ text: string }>(
-        "/api/classDesign/toCode",
-        { fileName, codeText: fileRes.text, formatId },
-        "生成に失敗しました"
-      );
-      setText(outputRes.text);
-    } catch (e: any) {
-      console.error(e);
-      setErr(e.message);
-    } finally {
-      setIsRunning(false);
-    }
-  };
-
-  // todo: 出力ボタン作成
-
   return (
     <div>
       <div>
@@ -75,52 +18,53 @@ export default function ClassDesignPage() {
       </div>
 
       <div className="my-4">
-        <h2>① コードから解析</h2>
-        <div className="my-2">
-          <h3 className="text-muted-foreground">
-            生成元コードのファイル名と使用するプロンプトを指定してください
-          </h3>
-          <div className="flex gap-2 items-center">
-            <input
-              className="border rounded px-2 py-1"
-              value={fileName}
-              onChange={(e) => setFileName(e.target.value)}
-            />
+        <GenerateSection
+          title="① コードから解析"
+          description="生成元コードのファイル名と使用するプロンプトを指定してください"
+          promptKind="classDesign"
+          fileNameLabel="ファイル名"
+          showResult
+          run={async ({ fileName, formatId }) => {
+            const fileRes = await postJson<{ text: string }>(
+              "/api/files/textByName",
+              { fileName },
+              FILE_READ_ERROR
+            );
 
-            <select
-              className="border rounded px-2 py-1"
-              value={formatId}
-              onChange={(e) => setFormatId(e.target.value)}
-            >
-              {templates.map((t) => (
-                <option key={t.id} value={t.id} disabled={!t.enabled}>
-                  {t.label}
-                  {!t.enabled ? "（準備中）" : ""}
-                </option>
-              ))}
-            </select>
+            const outputRes = await postJson<{ text: string }>(
+              "/api/classDesign/toCode",
+              { fileName, codeText: fileRes.text, formatId },
+              "生成に失敗しました"
+            );
 
-            <Button
-              onClick={load}
-              disabled={isRunning}
-              className="bg-blue-400 hover:bg-blue-600"
-            >
-              {isRunning ? "処理中..." : "読み込み→生成"}
-            </Button>
-          </div>
-
-          {err ? <p className="text-red-400 font-bold text-sm">{err}</p> : null}
-        </div>
-
-        <h3 className="text-muted-foreground">解析結果</h3>
-        <pre className="border rounded p-3 overflow-auto whitespace-pre-wrap">
-          {text}
-        </pre>
+            return outputRes.text;
+          }}
+        />
       </div>
 
       <div className="my-4">
-        <h2>② 「機能一覧表」から生成する</h2>
-        <p className="text-muted-foreground">未実装</p>
+        <GenerateSection
+          title="② 「機能一覧表」から生成する"
+          description="機能一覧表（EXCEL）のファイル名と使用するプロンプトを指定してください"
+          promptKind="classDesign"
+          fileNameLabel="ファイル名"
+          showResult={true}
+          run={async ({ fileName, formatId }) => {
+            // 1) 機能一覧表（EXCEL）読み込み
+            const screenFileRes = await postJson<{ sheets: ExcelSheets }>(
+              "/api/files/excelToJsonByName",
+              { fileName: fileName },
+              FILE_READ_ERROR
+            );
+
+            const outputRes = await postJson<{ text: string }>(
+              "/api/classDesign/fromFunctionList",
+              { fileName, excelJson: screenFileRes.sheets, formatId },
+              "生成に失敗しました"
+            );
+            return outputRes.text;
+          }}
+        />
       </div>
     </div>
   );
