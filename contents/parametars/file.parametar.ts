@@ -10,9 +10,9 @@ const ENV_PROMPT_DIR = process.env.PROMPT_LOCAL_DIR;
 // デフォルトファイルパス
 const DEFAULT_WORKSPACE_DIR = "workspace";
 const DEFAULT_INPUT_DIR = "workspace/inputs";
-const DEFAULT_OUTPUT_DIR = "workspace/meta";
-const DEFAULT_META_DIR = "workspace/prompts";
-const DEFAULT_PROMPT_DIR = "workspace/outputs";
+const DEFAULT_OUTPUT_DIR = "workspace/outputs";
+const DEFAULT_META_DIR = "workspace/meta";
+const DEFAULT_PROMPT_DIR = "workspace/prompts";
 
 // ファイルパス
 export const WORKSPACE_DIR = ENV_WORKSPACE_DIR ?? DEFAULT_WORKSPACE_DIR;
