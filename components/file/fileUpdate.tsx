@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Button } from "../ui/button";
 import { FileSelectButton } from "./fileSelectButton";
 import { FileMeta } from "@/contents/types/file.type";
-import { humanizeMime } from "@/lib/files/humanizeMime.file";
+import { humanizeMime } from "@/lib/files/isProbably.file";
 
 export default function FileUpdate() {
   const [files, setFiles] = useState<FileMeta[]>([]);
