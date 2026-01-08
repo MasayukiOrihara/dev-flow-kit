@@ -1,14 +1,8 @@
 // lib/guard.ts
-type PlainObject = Record<string, unknown>;
 
-const isPlainObject = (v: unknown): v is PlainObject =>
-  typeof v === "object" && v !== null && !Array.isArray(v);
-
-export const badRequest = (message: string) =>
-  Response.json({ error: message }, { status: 400 });
-
-export const notFound = (message: string) =>
-  Response.json({ error: message }, { status: 404 });
+import { PlainObject } from "@/contents/types/guard.type";
+import { badRequest } from "./error.guard";
+import { isPlainObject } from "./object.guard";
 
 /**
  * 文字列で受け取る
