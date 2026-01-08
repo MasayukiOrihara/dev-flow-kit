@@ -1,19 +1,11 @@
 import { NOT_FOUND_ERROR } from "@/contents/messages/error.message";
+import { deleteFromSavedPath } from "@/lib/files/bytesFromSavedPath.file";
 import { ensureLocalDirs } from "@/lib/files/ensureDirs.file";
 import { readMeta, writeMeta } from "@/lib/files/meta.file";
-import { notFound } from "@/lib/guard/error.guard";
+import { isErrnoException, notFound } from "@/lib/guard/error.guard";
 import fs from "node:fs/promises";
 
 export const runtime = "nodejs";
-
-function isErrnoException(e: unknown): e is NodeJS.ErrnoException {
-  return (
-    typeof e === "object" &&
-    e !== null &&
-    "code" in e &&
-    typeof (e as { code?: unknown }).code === "string"
-  );
-}
 
 /**
  * ファイル取得
@@ -71,16 +63,7 @@ export async function DELETE(
   console.log(absPath);
 
   // 1) 実体削除（無くてもOK扱いにする）
-  try {
-    await fs.unlink(absPath);
-  } catch (e: unknown) {
-    // ファイルが既に無い場合だけ握りつぶす（それ以外は投げる）
-    if (isErrnoException(e) && e.code === "ENOENT") {
-      console.warn(NOT_FOUND_ERROR);
-    } else {
-      throw e;
-    }
-  }
+  await deleteFromSavedPath(absPath);
 
   // 2) メタから削除
   const next = [...list.slice(0, idx), ...list.slice(idx + 1)];

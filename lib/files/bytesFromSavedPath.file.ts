@@ -1,0 +1,46 @@
+import fs from "node:fs/promises";
+import { del } from "@vercel/blob";
+import { isHttpUrl, isVercelBlobUrl } from "../guard/file.guard";
+import { isErrnoException } from "../guard/error.guard";
+import { NOT_FOUND_ERROR } from "@/contents/messages/error.message";
+
+// 後続処理で “savedPath” からバイナリを取得する最短ヘルパ
+export async function readBytesFromSavedPath(
+  savedPath: string
+): Promise<Uint8Array> {
+  if (isHttpUrl(savedPath)) {
+    const res = await fetch(savedPath);
+    if (!res.ok) throw new Error("Failed to fetch file");
+    return new Uint8Array(await res.arrayBuffer());
+  }
+  return new Uint8Array(await fs.readFile(savedPath));
+}
+
+/**
+ * savedPath を削除する
+ * - URL: （Vercel Blob想定なら）del(url) で削除
+ * - ローカル: fs.unlink
+ * - 無い/消えてる: OK（ENOENT は握りつぶす）
+ */
+export async function deleteFromSavedPath(savedPath: string): Promise<void> {
+  if (isHttpUrl(savedPath)) {
+    // “URLなら何でも消せる” は危険なので、Vercel Blob だけ削除対象
+    if (!isVercelBlobUrl(savedPath)) {
+      throw new Error("This URL is not deletable by this app");
+    }
+    // Blob削除（URLでも pathname でもOKな想定）
+    await del(savedPath);
+    return;
+  }
+  try {
+    await fs.unlink(savedPath);
+  } catch (e: unknown) {
+    // ファイルが既に無い場合だけ握りつぶす（それ以外は投げる）
+    if (isErrnoException(e) && e.code === "ENOENT") {
+      console.warn(NOT_FOUND_ERROR);
+      return;
+    } else {
+      throw e;
+    }
+  }
+}
