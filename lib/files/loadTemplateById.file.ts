@@ -1,6 +1,5 @@
 import { TEMPLATE_INDEX } from "@/contents/parametars/file.parametar";
 import { FormatMeta } from "@/contents/types/prompt.type";
-import fs from "node:fs/promises";
 import path from "node:path";
 import { readBodyFromSavedPath } from "./bytesFromSavedPath.file";
 
@@ -31,10 +30,14 @@ export async function loadTemplateById(
   }
 
   // ③ 実体ファイルを読む
-  const templatePath = path.join(templateDir, `${formatId}.txt`);
-
   try {
-    return await fs.readFile(templatePath, "utf-8");
+    const templatePath = path.join(templateDir, `${formatId}.txt`);
+
+    // ファイル取得
+    const buf = await readBodyFromSavedPath(templatePath);
+    const text = new TextDecoder("utf-8").decode(buf);
+
+    return text;
   } catch {
     throw new Error(`Template file missing: ${formatId}`);
   }
