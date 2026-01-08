@@ -68,6 +68,7 @@ export async function DELETE(
   if (!meta.savedPath) return notFound(NOT_FOUND_ERROR);
 
   const absPath = meta.savedPath;
+  console.log(absPath);
 
   // 1) 実体削除（無くてもOK扱いにする）
   try {
@@ -75,9 +76,10 @@ export async function DELETE(
   } catch (e: unknown) {
     // ファイルが既に無い場合だけ握りつぶす（それ以外は投げる）
     if (isErrnoException(e) && e.code === "ENOENT") {
-      return;
+      console.warn(NOT_FOUND_ERROR);
+    } else {
+      throw e;
     }
-    throw e;
   }
 
   // 2) メタから削除
