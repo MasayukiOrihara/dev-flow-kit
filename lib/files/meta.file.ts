@@ -54,6 +54,7 @@ export async function writeMeta(list: FileMeta[]) {
   await put(META_FILE, JSON.stringify(list, null, 2), {
     access: "public", // とりあえず public
     contentType: "application/json",
+    allowOverwrite: true,
     addRandomSuffix: false,
   });
 }

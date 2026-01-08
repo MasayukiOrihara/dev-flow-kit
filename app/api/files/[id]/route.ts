@@ -48,10 +48,8 @@ export async function DELETE(
   _req: Request,
   ctx: { params: Promise<{ id: string }> }
 ) {
-  console.log("🐶");
   const { id } = await ctx.params;
   await ensureLocalDirs();
-  console.log("🐶");
 
   const list = await readMeta();
   const idx = list.findIndex((m) => m.id === id);
@@ -62,11 +60,11 @@ export async function DELETE(
   if (!meta.savedPath) return notFound(NOT_FOUND_ERROR);
 
   const absPath = meta.savedPath;
-  console.log(absPath);
 
   // 1) 実体削除（無くてもOK扱いにする）
   await deleteFromSavedPath(absPath);
 
+  console.log("蟹");
   // 2) メタから削除
   const next = [...list.slice(0, idx), ...list.slice(idx + 1)];
   await writeMeta(next);

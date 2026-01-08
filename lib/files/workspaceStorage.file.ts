@@ -47,6 +47,7 @@ export async function saveInputFile(file: File): Promise<FileMeta> {
   const blob = await put(logicalPath, file, {
     access: "public",
     contentType: mime,
+    allowOverwrite: true,
     addRandomSuffix: false,
   });
 
