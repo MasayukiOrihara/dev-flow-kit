@@ -5,15 +5,16 @@ import { isErrnoException } from "../guard/error.guard";
 import { NOT_FOUND_ERROR } from "@/contents/messages/error.message";
 
 // 後続処理で “savedPath” からバイナリを取得する最短ヘルパ
-export async function readBytesFromSavedPath(
+export async function readBodyFromSavedPath(
   savedPath: string
-): Promise<Uint8Array> {
+): Promise<ArrayBuffer> {
   if (isHttpUrl(savedPath)) {
     const res = await fetch(savedPath);
     if (!res.ok) throw new Error("Failed to fetch file");
-    return new Uint8Array(await res.arrayBuffer());
+    return await res.arrayBuffer();
   }
-  return new Uint8Array(await fs.readFile(savedPath));
+  const buf = await fs.readFile(savedPath); // Buffer
+  return buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength);
 }
 
 /**

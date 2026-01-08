@@ -1,9 +1,11 @@
 import { NOT_FOUND_ERROR } from "@/contents/messages/error.message";
-import { deleteFromSavedPath } from "@/lib/files/bytesFromSavedPath.file";
+import {
+  deleteFromSavedPath,
+  readBodyFromSavedPath,
+} from "@/lib/files/bytesFromSavedPath.file";
 import { ensureLocalDirs } from "@/lib/files/ensureDirs.file";
 import { readMeta, writeMeta } from "@/lib/files/meta.file";
 import { notFound } from "@/lib/guard/error.guard";
-import fs from "node:fs/promises";
 
 export const runtime = "nodejs";
 
@@ -25,7 +27,7 @@ export async function GET(
   if (!meta || !meta.savedPath) return notFound(NOT_FOUND_ERROR);
 
   const absPath = meta.savedPath;
-  const buf = await fs.readFile(absPath);
+  const buf = await readBodyFromSavedPath(absPath);
 
   // ブラウザで開ける/ダウンロードできる形で返す
   return new Response(buf, {
