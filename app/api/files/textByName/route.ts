@@ -1,4 +1,5 @@
 import * as ERR from "@/contents/messages/error.message";
+import { readBodyFromSavedPath } from "@/lib/files/bytesFromSavedPath.file";
 import { isProbablyTextFile } from "@/lib/files/isProbably.file";
 import { readMeta } from "@/lib/files/meta.file";
 import { reqString } from "@/lib/guard/api.guard";
@@ -39,7 +40,8 @@ export async function POST(req: Request) {
 
   console.log("コードファイル取得中...");
   // utf-8として読む（コード/仕様書前提）
-  const text = await fs.readFile(absPath, "utf-8");
+  const ab = await readBodyFromSavedPath(absPath);
+  const text = new TextDecoder("utf-8").decode(ab);
 
   console.log("コード取得 → テキスト出力");
   return Response.json({

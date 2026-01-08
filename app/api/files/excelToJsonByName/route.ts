@@ -8,6 +8,7 @@ import { normalizeCellValue } from "@/lib/files/normalizeCellValue.file";
 import { badRequest, notFound } from "@/lib/guard/error.guard";
 import { JsonRow, SheetsJson } from "@/contents/types/excel.type";
 import { isProbablyExcelFile } from "@/lib/files/isProbably.file";
+import { readBodyFromSavedPath } from "@/lib/files/bytesFromSavedPath.file";
 
 export const runtime = "nodejs";
 
@@ -39,17 +40,11 @@ export async function POST(req: Request) {
 
   console.log("エクセルファイル取得中...");
   // ExcelはBufferで読む
-  const buf = await fs.readFile(absPath);
-
-  // Buffer -> ArrayBuffer（中身だけを切り出すのが重要）
-  const arrayBuffer = buf.buffer.slice(
-    buf.byteOffset,
-    buf.byteOffset + buf.byteLength
-  );
+  const buf = await readBodyFromSavedPath(absPath);
 
   // Excel → JSON
   const workbook = new ExcelJS.Workbook();
-  await workbook.xlsx.load(arrayBuffer);
+  await workbook.xlsx.load(buf);
 
   const sheetsJson: SheetsJson = {};
 
