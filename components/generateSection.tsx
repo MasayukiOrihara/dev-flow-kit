@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "./ui/button";
+import { isErrnoException } from "@/lib/guard/error.guard";
 
 export type TemplateItem = {
   id: string;
@@ -75,9 +76,13 @@ export function GenerateSection({
           const firstEnabled = list.find((t) => t.enabled) ?? list[0];
           setFormatId(firstEnabled.id);
         }
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } catch (e: any) {
-        setErr(e?.message ?? "プロンプト一覧の取得に失敗しました");
+      } catch (e) {
+        console.error(e);
+        if (isErrnoException(e)) {
+          setErr(e.message ?? "プロンプト一覧の取得に失敗しました");
+        } else {
+          setErr("プロンプト一覧の取得に失敗しました");
+        }
       }
     })();
   }, []);
@@ -109,7 +114,11 @@ export function GenerateSection({
       if (showResult) setText(resultText ?? "");
     } catch (e) {
       console.error(e);
-      setErr("処理に失敗しました");
+      if (isErrnoException(e)) {
+        setErr(e.message ?? "処理に失敗しました");
+      } else {
+        setErr("処理に失敗しました");
+      }
     } finally {
       setIsRunning(false);
     }

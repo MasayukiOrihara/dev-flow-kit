@@ -2,12 +2,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import ExcelJS from "exceljs";
 import { SEND_FILE_ERROR } from "@/contents/messages/error.message";
-import {
-  JsonRow,
-  rowValuesToJsonRow,
-  SheetsJson,
-} from "@/lib/excel/toJsonCell";
+import { rowValuesToJsonRow } from "@/lib/excel/toJsonCell";
 import { badRequest } from "@/lib/guard/error.guard";
+import { JsonRow, SheetsJson } from "@/contents/types/excel.type";
 
 export const runtime = "nodejs";
 

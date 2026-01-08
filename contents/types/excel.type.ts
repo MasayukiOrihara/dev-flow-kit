@@ -11,3 +11,8 @@ export type Payload = {
   fileName: string;
   cases: TestCaseRow[] | ComprehensiveTestCaseRow[];
 };
+
+// エクセルのファイル型
+export type JsonCell = string | number | boolean | null;
+export type JsonRow = JsonCell[];
+export type SheetsJson = Record<string, JsonRow[]>;

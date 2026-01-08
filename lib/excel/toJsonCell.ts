@@ -1,6 +1,4 @@
-export type JsonCell = string | number | boolean | null;
-export type JsonRow = JsonCell[];
-export type SheetsJson = Record<string, JsonRow[]>;
+import { JsonCell, JsonRow } from "@/contents/types/excel.type";
 
 export function toJsonCell(v: unknown): JsonCell {
   if (v == null) return null;

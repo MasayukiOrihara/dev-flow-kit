@@ -2,11 +2,9 @@
 
 import { Button } from "@/components/ui/button";
 import { FILE_READ_ERROR } from "@/contents/messages/error.message";
+import { SheetsJson } from "@/contents/types/excel.type";
 import { postJson } from "@/lib/api/postJson.api";
 import { useEffect, useState } from "react";
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type ExcelSheets = Record<string, any[][]>;
 
 /**
  * 単体テスト仕様書作成ページ
@@ -47,7 +45,7 @@ export default function UnitTestDesignPage() {
 
     try {
       // 1) エクセルファイル読み込み
-      const excelFileRes = await postJson<{ sheets: ExcelSheets }>(
+      const excelFileRes = await postJson<{ sheets: SheetsJson }>(
         "/api/files/excelToJsonByName",
         { fileName: excelFileName },
         FILE_READ_ERROR

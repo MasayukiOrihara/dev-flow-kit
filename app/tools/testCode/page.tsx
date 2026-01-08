@@ -2,10 +2,10 @@
 
 import { Button } from "@/components/ui/button";
 import { postJson } from "@/lib/api/postJson.api";
-import { ExcelSheets } from "../unitTestDesign/page";
 import { useEffect, useState } from "react";
 import { postSSEJson } from "@/lib/api/postSSEJson";
 import { FILE_READ_ERROR } from "@/contents/messages/error.message";
+import { SheetsJson } from "@/contents/types/excel.type";
 
 export default function TestCodePage() {
   const [excelFileName, setExcelFileName] = useState("");
@@ -42,7 +42,7 @@ export default function TestCodePage() {
 
     try {
       // 1) エクセルファイル読み込み
-      const excelFileRes = await postJson<{ sheets: ExcelSheets }>(
+      const excelFileRes = await postJson<{ sheets: SheetsJson }>(
         "/api/files/excelToJsonByName",
         { fileName: excelFileName },
         FILE_READ_ERROR

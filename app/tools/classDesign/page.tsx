@@ -2,8 +2,8 @@
 
 import { GenerateSection } from "@/components/generateSection";
 import { FILE_READ_ERROR } from "@/contents/messages/error.message";
+import { SheetsJson } from "@/contents/types/excel.type";
 import { postJson } from "@/lib/api/postJson.api";
-import { ExcelSheets } from "../unitTestDesign/page";
 
 /**
  * クラス仕様書生成ページ
@@ -51,7 +51,7 @@ export default function ClassDesignPage() {
           showResult={true}
           run={async ({ fileName, formatId }) => {
             // 1) 機能一覧表（EXCEL）読み込み
-            const screenFileRes = await postJson<{ sheets: ExcelSheets }>(
+            const screenFileRes = await postJson<{ sheets: SheetsJson }>(
               "/api/files/excelToJsonByName",
               { fileName: fileName },
               FILE_READ_ERROR

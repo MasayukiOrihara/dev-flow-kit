@@ -2,9 +2,9 @@
 
 import { Button } from "@/components/ui/button";
 import { postJson } from "@/lib/api/postJson.api";
-import { ExcelSheets } from "../unitTestDesign/page";
 import { useEffect, useState } from "react";
 import { FILE_READ_ERROR } from "@/contents/messages/error.message";
+import { SheetsJson } from "@/contents/types/excel.type";
 
 export default function SystemTestDesignPage() {
   const [functionFileName, setFunctionFileName] = useState("");
@@ -42,7 +42,7 @@ export default function SystemTestDesignPage() {
 
     try {
       // 1) 機能一覧表（EXCEL）読み込み
-      const functionFileRes = await postJson<{ sheets: ExcelSheets }>(
+      const functionFileRes = await postJson<{ sheets: SheetsJson }>(
         "/api/files/excelToJsonByName",
         { fileName: functionFileName },
         FILE_READ_ERROR
@@ -58,7 +58,7 @@ export default function SystemTestDesignPage() {
       setText("要求仕様書を読み込みました。");
 
       // 3) 画面仕様書（EXCEL）読み込み
-      const screenFileRes = await postJson<{ sheets: ExcelSheets }>(
+      const screenFileRes = await postJson<{ sheets: SheetsJson }>(
         "/api/files/excelToJsonByName",
         { fileName: screenFileName },
         FILE_READ_ERROR
