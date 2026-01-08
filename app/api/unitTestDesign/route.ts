@@ -11,12 +11,12 @@ import { OpenAi41 } from "@/contents/models/openai.model";
 import * as ERR from "@/contents/messages/error.message";
 import { Payload, TestType } from "@/contents/types/excel.type";
 import { buildWorkbook } from "@/lib/excel/exportSpecToExcel";
-import { loadTemplateById } from "../prompts/loadTemplateById/route";
 import { reqObject, reqString } from "@/lib/guard/api.guard";
+import { loadTemplateById } from "@/lib/files/loadTemplateById.file";
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json().catch(() => ({} as any));
+    const body: unknown = await req.json().catch(() => ({}));
 
     /* === === ガード === === */
     // ファイル名の取得
@@ -26,11 +26,7 @@ export async function POST(req: Request) {
     const codeText = reqString(body, "codeText", ERR.CODETEXT_ERROR);
     if (codeText instanceof Response) return codeText;
     // excelファイルの取得
-    const classDesign = reqObject<any>(
-      body,
-      "classDesign",
-      ERR.EXCELFILE_ERROR
-    );
+    const classDesign = reqObject(body, "classDesign", ERR.EXCELFILE_ERROR);
     if (classDesign instanceof Response) return classDesign;
     // プロンプトテンプレートの取得
     const formatId = reqString(body, "formatId", ERR.TEMPLATE_ERROR);

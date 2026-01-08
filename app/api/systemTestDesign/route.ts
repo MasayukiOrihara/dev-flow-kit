@@ -8,10 +8,10 @@ import { exportFile } from "@/lib/excel/exportFile";
 import { reqObject, reqString } from "@/lib/guard/api.guard";
 import { StructuredOutputParser } from "@langchain/core/output_parsers";
 import { PromptTemplate } from "@langchain/core/prompts";
-import { loadTemplateById } from "../prompts/loadTemplateById/route";
 import { TEST_DESIGN_DIR } from "@/contents/parametars/file.parametar";
 import { Payload, TestType } from "@/contents/types/excel.type";
 import { buildWorkbook } from "@/lib/excel/exportSpecToExcel";
+import { loadTemplateById } from "@/lib/files/loadTemplateById.file";
 
 const SYSTEM_TEST_NAME = "system-test";
 
@@ -22,21 +22,17 @@ const SYSTEM_TEST_NAME = "system-test";
  */
 export async function POST(req: Request) {
   try {
-    const body = await req.json().catch(() => ({} as any));
+    const body: unknown = await req.json().catch(() => ({}));
 
     /* === === ガード === === */
     // 機能一覧表(excel)の取得
-    const functionFile = reqObject<any>(
-      body,
-      "functionFile",
-      ERR.EXCELFILE_ERROR
-    );
+    const functionFile = reqObject(body, "functionFile", ERR.EXCELFILE_ERROR);
     if (functionFile instanceof Response) return functionFile;
     // 要求仕様書（TEXT）の取得
     const srsText = reqString(body, "srsText", ERR.CODETEXT_ERROR);
     if (srsText instanceof Response) return srsText;
     // 画面一覧表(excel)の取得
-    const screenFile = reqObject<any>(body, "screenFile", ERR.EXCELFILE_ERROR);
+    const screenFile = reqObject(body, "screenFile", ERR.EXCELFILE_ERROR);
     if (screenFile instanceof Response) return screenFile;
     // プロンプトテンプレートの取得
     const formatId = reqString(body, "formatId", ERR.TEMPLATE_ERROR);

@@ -1,12 +1,9 @@
-import {
-  BLOB_META_PATHNAME,
-  META_FILE,
-} from "@/contents/parametars/file.parametar";
+import { META_FILE } from "@/contents/parametars/file.parametar";
 import { FileMeta } from "@/contents/types/file.type";
 import fs from "node:fs/promises";
 import { put, list } from "@vercel/blob";
 import { ensureLocalDirs } from "./ensureDirs.file";
-import { driver } from "./workspaceStorage.file";
+import { driver } from "./pathResolver.file";
 
 /**
  * メタ情報の読み込み(local <-> blob 対応版)
@@ -28,8 +25,8 @@ export async function readMeta(): Promise<FileMeta[]> {
 
   // blob: pathname一致のblobを探してfetch
   try {
-    const { blobs } = await list({ prefix: BLOB_META_PATHNAME, limit: 1 });
-    const metaBlob = blobs.find((b) => b.pathname === BLOB_META_PATHNAME);
+    const { blobs } = await list({ prefix: META_FILE, limit: 1 });
+    const metaBlob = blobs.find((b) => b.pathname === META_FILE);
     if (!metaBlob) return [];
 
     const res = await fetch(metaBlob.url);
@@ -54,7 +51,7 @@ export async function writeMeta(list: FileMeta[]) {
   }
 
   // blob: 同じ pathname に上書き（最短）
-  await put(BLOB_META_PATHNAME, JSON.stringify(list, null, 2), {
+  await put(META_FILE, JSON.stringify(list, null, 2), {
     access: "public", // とりあえず public
     contentType: "application/json",
     addRandomSuffix: false,

@@ -1,10 +1,10 @@
 import { CLASS_DESIGN_DIR } from "@/contents/parametars/file.parametar";
 import { StringOutputParser } from "@langchain/core/output_parsers";
 import { PromptTemplate } from "@langchain/core/prompts";
-import { loadTemplateById } from "@/app/api/prompts/loadTemplateById/route";
 import { OpenAi41 } from "@/contents/models/openai.model";
 import * as ERR from "@/contents/messages/error.message";
 import { reqString } from "@/lib/guard/api.guard";
+import { loadTemplateById } from "@/lib/files/loadTemplateById.file";
 
 export const runtime = "nodejs";
 
@@ -15,7 +15,7 @@ export const runtime = "nodejs";
  */
 export async function POST(req: Request) {
   try {
-    const body = await req.json().catch(() => ({} as any));
+    const body: unknown = await req.json().catch(() => ({}));
 
     /* === === ガード === === */
     // コードの取得

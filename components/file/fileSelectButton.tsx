@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function FileSelectButton({ onUpload }: { onUpload: (e: any) => void }) {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [selectedNames, setSelectedNames] = useState<string>("");

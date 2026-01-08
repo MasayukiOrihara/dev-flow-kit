@@ -12,7 +12,7 @@ export const runtime = "nodejs";
  * @returns
  */
 export async function POST(req: Request) {
-  const body = await req.json().catch(() => ({} as any));
+  const body: unknown = await req.json().catch(() => ({}));
 
   // ファイル名の取得
   const fileName = reqString(body, "fileName", ERR.FILENAME_ERROR);

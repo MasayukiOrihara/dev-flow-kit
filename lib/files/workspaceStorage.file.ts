@@ -1,6 +1,5 @@
 // lib/storage/workspaceStorage.ts
 import fs from "node:fs/promises";
-import path from "node:path";
 import crypto from "node:crypto";
 import { put } from "@vercel/blob";
 
@@ -9,10 +8,7 @@ import { DEFAULT_MINE } from "@/contents/messages/mine.message";
 import { FileMeta } from "@/contents/types/file.type";
 import { ensureLocalDirs } from "./ensureDirs.file";
 import { INPUT_DIR } from "@/contents/parametars/file.parametar";
-
-export function driver(): "local" | "blob" {
-  return process.env.STORAGE_DRIVER === "blob" ? "blob" : "local";
-}
+import { driver, resolveLocalWritePath } from "./pathResolver.file";
 
 export async function saveInputFile(file: File): Promise<FileMeta> {
   const id = crypto.randomUUID();
@@ -23,10 +19,13 @@ export async function saveInputFile(file: File): Promise<FileMeta> {
   if (driver() === "local") {
     await ensureLocalDirs();
     const buf = Buffer.from(await file.arrayBuffer());
-    const savedName = `${id}-${name}`;
-    const absPath = path.join(INPUT_DIR, savedName);
-    await fs.writeFile(absPath, buf);
 
+    // パスの作成
+    const savedName = `${id}-${name}`;
+    const logicalPath = `${INPUT_DIR}/${savedName}`;
+    const absPath = resolveLocalWritePath(logicalPath);
+
+    await fs.writeFile(absPath, buf);
     return {
       id,
       name,
@@ -39,7 +38,8 @@ export async function saveInputFile(file: File): Promise<FileMeta> {
 
   // blob
   const savedName = `${id}-${name}`;
-  const blob = await put(`${INPUT_DIR}/${savedName}`, file, {
+  const logicalPath = `${INPUT_DIR}/${savedName}`;
+  const blob = await put(logicalPath, file, {
     access: "public",
     contentType: mime,
     addRandomSuffix: false,
@@ -53,16 +53,4 @@ export async function saveInputFile(file: File): Promise<FileMeta> {
     savedPath: blob.url, // ←最短で後続を壊さないため URL を入れる
     uploadedAt,
   };
-}
-
-// 後続処理で “savedPath” からバイナリを取得する最短ヘルパ
-export async function readBytesFromSavedPath(
-  savedPath: string
-): Promise<Uint8Array> {
-  if (/^https?:\/\//.test(savedPath)) {
-    const res = await fetch(savedPath);
-    if (!res.ok) throw new Error("Failed to fetch file");
-    return new Uint8Array(await res.arrayBuffer());
-  }
-  return new Uint8Array(await fs.readFile(savedPath));
 }

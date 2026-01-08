@@ -6,11 +6,12 @@ import { badRequest, notFound, reqString } from "@/lib/guard/api.guard";
 import * as ERR from "@/contents/messages/error.message";
 import { isProbablyExcelFile } from "@/lib/files/isProbablyExcelFile.file";
 import { normalizeCellValue } from "@/lib/files/normalizeCellValue.file";
+import { JsonRow, SheetsJson } from "@/lib/excel/toJsonCell";
 
 export const runtime = "nodejs";
 
 export async function POST(req: Request) {
-  const body = await req.json().catch(() => ({} as any));
+  const body: unknown = await req.json().catch(() => ({}));
 
   const fileName = reqString(body, "fileName", ERR.FILENAME_ERROR);
   if (fileName instanceof Response) return fileName;
@@ -49,10 +50,10 @@ export async function POST(req: Request) {
   const workbook = new ExcelJS.Workbook();
   await workbook.xlsx.load(arrayBuffer);
 
-  const sheetsJson: Record<string, any[]> = {};
+  const sheetsJson: SheetsJson = {};
 
   workbook.eachSheet((worksheet) => {
-    const rows: any[] = [];
+    const rows: JsonRow[] = [];
 
     // 列数を揃えたい場合（行ごとに末尾セル数がブレる対策）
     let maxCols = 0;
@@ -61,7 +62,7 @@ export async function POST(req: Request) {
     });
 
     worksheet.eachRow((row) => {
-      const arr: any[] = [];
+      const arr: JsonRow = [];
       for (let i = 1; i <= maxCols; i++) {
         arr.push(normalizeCellValue(row.getCell(i).value));
       }

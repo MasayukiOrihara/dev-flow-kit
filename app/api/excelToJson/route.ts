@@ -3,6 +3,11 @@ import { NextRequest, NextResponse } from "next/server";
 import ExcelJS from "exceljs";
 import { SEND_FILE_ERROR } from "@/contents/messages/error.message";
 import { badRequest } from "@/lib/guard/api.guard";
+import {
+  JsonRow,
+  rowValuesToJsonRow,
+  SheetsJson,
+} from "@/lib/excel/toJsonCell";
 
 export const runtime = "nodejs";
 
@@ -19,15 +24,15 @@ export async function POST(req: NextRequest) {
     const workbook = new ExcelJS.Workbook();
     await workbook.xlsx.load(arrayBuffer);
 
-    const sheetsJson: Record<string, any[]> = {};
+    const sheetsJson: SheetsJson = {};
 
-    workbook.eachSheet((worksheet, _sheetId) => {
-      const rows: any[] = [];
+    workbook.eachSheet((worksheet) => {
+      const rows: JsonRow[] = [];
 
-      worksheet.eachRow((row, _rowNumber) => {
-        const rowValues = row.values as any[];
+      worksheet.eachRow((row) => {
+        const jsonRow = rowValuesToJsonRow(row.values);
         // ExcelJS の row.values[0] は null ⇒切り捨て
-        rows.push(rowValues.slice(1));
+        rows.push(jsonRow);
       });
 
       sheetsJson[worksheet.name] = rows;

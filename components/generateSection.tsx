@@ -75,6 +75,7 @@ export function GenerateSection({
           const firstEnabled = list.find((t) => t.enabled) ?? list[0];
           setFormatId(firstEnabled.id);
         }
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (e: any) {
         setErr(e?.message ?? "プロンプト一覧の取得に失敗しました");
       }
@@ -106,9 +107,9 @@ export function GenerateSection({
       });
 
       if (showResult) setText(resultText ?? "");
-    } catch (e: any) {
+    } catch (e) {
       console.error(e);
-      setErr(e?.message ?? "処理に失敗しました");
+      setErr("処理に失敗しました");
     } finally {
       setIsRunning(false);
     }

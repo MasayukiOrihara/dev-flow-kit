@@ -1,6 +1,7 @@
 export async function postSSEJson(
   url: string,
   body: unknown,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onEvent: (evt: any) => void
 ) {
   const res = await fetch(url, {

@@ -101,6 +101,7 @@ export async function buildWorkbook(payload: Payload, type: TestType) {
       jl(c.expected),
       c.exec_date ?? "",
       c.exec_result ?? "",
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       ...(type === "system" ? [jl((c as any).precondition)] : []), // ★ここ
       jl(c.remarks),
     ]);

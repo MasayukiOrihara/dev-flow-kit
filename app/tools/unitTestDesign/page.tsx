@@ -5,6 +5,7 @@ import { FILE_READ_ERROR } from "@/contents/messages/error.message";
 import { postJson } from "@/lib/api/postJson.api";
 import { useEffect, useState } from "react";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type ExcelSheets = Record<string, any[][]>;
 
 /**
@@ -74,9 +75,9 @@ export default function UnitTestDesignPage() {
         "生成に失敗しました"
       );
       setText(outputRes.message);
-    } catch (e: any) {
+    } catch (e) {
       console.error(e);
-      setErr(e.message);
+      setErr("生成に失敗しました");
     } finally {
       setIsRunning(false);
     }

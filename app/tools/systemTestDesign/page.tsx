@@ -78,6 +78,7 @@ export default function SystemTestDesignPage() {
         "生成に失敗しました"
       );
       setText(outputRes.message);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (e: any) {
       console.error(e);
       setErr(e.message);

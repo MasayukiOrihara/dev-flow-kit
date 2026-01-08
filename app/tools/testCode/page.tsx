@@ -72,6 +72,7 @@ export default function TestCodePage() {
           if (evt.delta) setText((prev) => prev + evt.delta);
         }
       });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (e: any) {
       console.error(e);
       setErr(e.message);
@@ -98,6 +99,7 @@ export default function TestCodePage() {
       );
 
       setText(`${res.fileName} を 出力しました`);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (e: any) {
       console.error(e);
       setErr(e.message);

@@ -4,8 +4,8 @@ import { reqObject, reqString } from "@/lib/guard/api.guard";
 import { toUIMessageStream } from "@ai-sdk/langchain";
 import { PromptTemplate } from "@langchain/core/prompts";
 import { createUIMessageStreamResponse } from "ai";
-import { loadTemplateById } from "../prompts/loadTemplateById/route";
 import { TEST_CODE_DIR } from "@/contents/parametars/file.parametar";
+import { loadTemplateById } from "@/lib/files/loadTemplateById.file";
 
 /**
  * テストコードを生成する
@@ -14,7 +14,7 @@ import { TEST_CODE_DIR } from "@/contents/parametars/file.parametar";
  */
 export async function POST(req: Request) {
   try {
-    const body = await req.json().catch(() => ({} as any));
+    const body: unknown = await req.json().catch(() => ({}));
 
     /* === === ガード === === */
     // ファイル名の取得
@@ -24,7 +24,7 @@ export async function POST(req: Request) {
     const codeText = reqString(body, "codeText", ERR.CODETEXT_ERROR);
     if (codeText instanceof Response) return codeText;
     // excelファイルの取得
-    const testDesign = reqObject<any>(body, "testDesign", ERR.EXCELFILE_ERROR);
+    const testDesign = reqObject(body, "testDesign", ERR.EXCELFILE_ERROR);
     if (testDesign instanceof Response) return testDesign;
     // プロンプトテンプレートの取得
     const formatId = reqString(body, "formatId", ERR.TEMPLATE_ERROR);

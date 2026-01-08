@@ -12,6 +12,7 @@ export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const kind = searchParams.get("kind"); // "classDesign" など
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let list: any[] = [];
   try {
     const s = await fs.readFile(TEMPLATE_INDEX, "utf-8");

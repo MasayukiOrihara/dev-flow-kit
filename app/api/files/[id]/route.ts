@@ -1,10 +1,19 @@
 import { NOT_FOUND_ERROR } from "@/contents/messages/error.message";
-import { ensureDirs } from "@/lib/files/ensureDirs.file";
+import { ensureLocalDirs } from "@/lib/files/ensureDirs.file";
 import { readMeta, writeMeta } from "@/lib/files/meta.file";
 import { notFound } from "@/lib/guard/api.guard";
 import fs from "node:fs/promises";
 
 export const runtime = "nodejs";
+
+function isErrnoException(e: unknown): e is NodeJS.ErrnoException {
+  return (
+    typeof e === "object" &&
+    e !== null &&
+    "code" in e &&
+    typeof (e as { code?: unknown }).code === "string"
+  );
+}
 
 /**
  * ファイル取得
@@ -48,7 +57,7 @@ export async function DELETE(
   ctx: { params: Promise<{ id: string }> }
 ) {
   const { id } = await ctx.params;
-  await ensureDirs();
+  await ensureLocalDirs();
 
   const list = await readMeta();
   const idx = list.findIndex((m) => m.id === id);
@@ -63,9 +72,12 @@ export async function DELETE(
   // 1) 実体削除（無くてもOK扱いにする）
   try {
     await fs.unlink(absPath);
-  } catch (e: any) {
+  } catch (e: unknown) {
     // ファイルが既に無い場合だけ握りつぶす（それ以外は投げる）
-    if (e?.code !== "ENOENT") throw e;
+    if (isErrnoException(e) && e.code === "ENOENT") {
+      return;
+    }
+    throw e;
   }
 
   // 2) メタから削除
