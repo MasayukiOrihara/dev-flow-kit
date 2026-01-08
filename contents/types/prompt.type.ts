@@ -4,3 +4,10 @@ export type FormatMeta = {
   description?: string;
   enabled: boolean;
 };
+
+export type TemplateItem = {
+  id: string;
+  label: string;
+  kind: string;
+  enabled: boolean;
+};

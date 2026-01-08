@@ -3,12 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "./ui/button";
 import { isErrnoException } from "@/lib/guard/error.guard";
-
-export type TemplateItem = {
-  id: string;
-  label: string;
-  enabled: boolean;
-};
+import { TemplateItem } from "@/contents/types/prompt.type";
 
 export type GenerateSectionRunArgs = {
   fileName: string;
