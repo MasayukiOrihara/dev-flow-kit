@@ -16,8 +16,6 @@ export async function loadTemplateById(
     throw new Error("Invalid template id");
   }
 
-  console.log(TEMPLATE_INDEX);
-
   // ② index.json を読む（許可リスト）
   const savedPath = resolveReadPath(TEMPLATE_INDEX);
   const ab = await readBodyFromSavedPath(savedPath);
