@@ -2,6 +2,7 @@ import { TEMPLATE_INDEX } from "@/contents/parametars/file.parametar";
 import { FormatMeta } from "@/contents/types/prompt.type";
 import fs from "node:fs/promises";
 import path from "node:path";
+import { readBodyFromSavedPath } from "./bytesFromSavedPath.file";
 
 /**
  * テンプレIDからプロンプト本文を取得する
@@ -16,8 +17,12 @@ export async function loadTemplateById(
   }
 
   // ② index.json を読む（許可リスト）
-  const indexRaw = await fs.readFile(TEMPLATE_INDEX, "utf-8");
-  const formats = JSON.parse(indexRaw) as FormatMeta[];
+  const ab = await readBodyFromSavedPath(TEMPLATE_INDEX);
+  const indexRaw = new TextDecoder("utf-8").decode(ab);
+  const parsed: unknown = JSON.parse(indexRaw);
+  const formats: FormatMeta[] = Array.isArray(parsed)
+    ? (parsed as FormatMeta[])
+    : [];
 
   const meta = formats.find((f) => f.id === formatId && f.enabled);
 
