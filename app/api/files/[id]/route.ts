@@ -48,8 +48,10 @@ export async function DELETE(
   _req: Request,
   ctx: { params: Promise<{ id: string }> }
 ) {
+  console.log("🐶");
   const { id } = await ctx.params;
   await ensureLocalDirs();
+  console.log("🐶");
 
   const list = await readMeta();
   const idx = list.findIndex((m) => m.id === id);
