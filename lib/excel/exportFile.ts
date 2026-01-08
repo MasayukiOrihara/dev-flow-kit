@@ -6,6 +6,7 @@ import { safeFileName } from "../files/safeFileName.file";
 import { EXCEL_MINE } from "@/contents/messages/mine.message";
 import { readMeta, writeMeta } from "../files/meta.file";
 import { Workbook } from "exceljs";
+import { resolveLocalWritePath } from "../files/pathResolver.file";
 
 /**
  * エクセルファイルを出力するときの処理
@@ -13,8 +14,8 @@ import { Workbook } from "exceljs";
  * @param type
  */
 export async function exportFile(wb: Workbook, fileName: string) {
-  // 保存名を決定
-  const dir = path.resolve(OUTPUT_DIR); // 保存ディレクトリ
+  // 保存名を決定a
+  const dir = resolveLocalWritePath(OUTPUT_DIR); // 保存ディレクトリ
   const baseName = `${safeFileName(fileName)}-testspec`;
   const ext = ".xlsx";
 
@@ -28,6 +29,7 @@ export async function exportFile(wb: Workbook, fileName: string) {
     outPath = path.join(dir, `${baseName}-${suffix}${ext}`);
     index++;
   }
+  console.log(outPath);
   await wb.xlsx.writeFile(outPath); // ← これで保存完了
 
   // ここでmeta情報に記録
