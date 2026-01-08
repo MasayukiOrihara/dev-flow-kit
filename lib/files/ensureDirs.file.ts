@@ -4,7 +4,7 @@ import fs from "node:fs/promises";
 /**
  * ディレクトリの作成
  */
-export async function ensureDirs() {
+export async function ensureLocalDirs() {
   await fs.mkdir(INPUT_DIR, { recursive: true });
   await fs.mkdir(META_DIR, { recursive: true });
 }

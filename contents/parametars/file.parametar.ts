@@ -1,6 +1,7 @@
 import path from "node:path";
 
 // ファイルパス
+export const WORKSPACE_DIR = path.join(process.cwd(), "workspace");
 export const INPUT_DIR = process.env.INPUT_DIR ?? "./workspace/inputs";
 export const META_DIR = process.env.META_DIR ?? "./workspace/meta";
 export const PROMPT_DIR = process.env.PROMPT_DIR ?? "./workspace/prompts";
@@ -11,3 +12,6 @@ export const TEMPLATE_INDEX = path.join(PROMPT_DIR, "index.json");
 export const CLASS_DESIGN_DIR = path.join(PROMPT_DIR, "classDesign");
 export const TEST_DESIGN_DIR = path.join(PROMPT_DIR, "testDesign");
 export const TEST_CODE_DIR = path.join(PROMPT_DIR, "testCode");
+
+// Blob側も “同じ論理パス” を使う
+export const BLOB_META_PATHNAME = "workspace/meta/files.json";

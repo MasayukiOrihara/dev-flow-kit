@@ -1,29 +1,15 @@
-import fs from "node:fs/promises";
-import path from "node:path";
-import crypto from "node:crypto";
 import { FileMeta } from "@/contents/types/file.type";
-import { ensureDirs } from "@/lib/files/ensureDirs.file";
-import { readMeta, writeMeta } from "@/lib/files/meta.file";
-import { safeFileName } from "@/lib/files/safeFileName.file";
-import { INPUT_DIR } from "@/contents/parametars/file.parametar";
-import { DEFAULT_MINE } from "@/contents/messages/mine.message";
 import { notFound } from "@/lib/guard/api.guard";
 import { NOT_FOUND_ERROR } from "@/contents/messages/error.message";
+import { saveInputFile } from "@/lib/files/workspaceStorage.file";
+import { readMeta, writeMeta } from "@/lib/files/meta.file";
 
-// fsを使うのでNode runtime
+// fsを使うのでNode runtime（blobでもOK）
 export const runtime = "nodejs";
 
-/**
- * アップロードAPI
- * @param req
- * @returns
- */
 export async function POST(req: Request) {
-  await ensureDirs();
-
   const form = await req.formData();
   const files = form.getAll("files");
-  // ガード
   if (!files.length) return notFound(NOT_FOUND_ERROR);
 
   const metaList = await readMeta();
@@ -31,28 +17,12 @@ export async function POST(req: Request) {
 
   for (const item of files) {
     if (!(item instanceof File)) continue;
-
-    const id = crypto.randomUUID();
-    const name = safeFileName(item.name || `file-${id}`);
-    const buf = Buffer.from(await item.arrayBuffer());
-    const savedPath = `${id}-${name}`;
-    const absPath = path.join(INPUT_DIR, savedPath);
-
-    await fs.writeFile(absPath, buf);
-
-    const meta: FileMeta = {
-      id,
-      name,
-      size: buf.length,
-      mime: item.type || DEFAULT_MINE,
-      savedPath: absPath,
-      uploadedAt: new Date().toISOString(),
-    };
-
+    const meta = await saveInputFile(item);
     metaList.unshift(meta);
     saved.push(meta);
   }
 
+  // メタ情報の書き込み
   await writeMeta(metaList);
 
   return Response.json({ saved });
@@ -60,7 +30,6 @@ export async function POST(req: Request) {
 
 // メタ情報の取得
 export async function GET() {
-  await ensureDirs();
   const metaList = await readMeta();
   return Response.json({ files: metaList });
 }
