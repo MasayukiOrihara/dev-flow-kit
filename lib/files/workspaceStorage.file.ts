@@ -10,6 +10,11 @@ import { ensureLocalDirs } from "./ensureDirs.file";
 import { INPUT_DIR } from "@/contents/parametars/file.parametar";
 import { driver, resolveLocalWritePath } from "./pathResolver.file";
 
+/**
+ * ファイ保存時の関数
+ * @param file
+ * @returns
+ */
 export async function saveInputFile(file: File): Promise<FileMeta> {
   const id = crypto.randomUUID();
   const name = safeFileName(file.name || `file-${id}`);

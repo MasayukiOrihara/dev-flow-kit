@@ -4,12 +4,12 @@ import path from "node:path";
 import { extractCodeBlock } from "@/lib/code/extractCodeBlock.code";
 import { extractSpecFileName } from "@/lib/code/extractSpecFileName.code";
 import { NOT_FOUND_CODE_ERROR } from "@/contents/messages/error.message";
-import { notFound } from "@/lib/guard/api.guard";
 import { OUTPUT_DIR } from "@/contents/parametars/file.parametar";
 import { readMeta, writeMeta } from "@/lib/files/meta.file";
 import { DEFAULT_MINE } from "@/contents/messages/mine.message";
 import { FileMeta } from "@/contents/types/file.type";
 import { NextResponse } from "next/server";
+import { notFound } from "@/lib/guard/error.guard";
 
 export async function POST(req: Request) {
   try {

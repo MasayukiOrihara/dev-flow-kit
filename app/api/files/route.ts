@@ -1,8 +1,8 @@
 import { FileMeta } from "@/contents/types/file.type";
-import { notFound } from "@/lib/guard/api.guard";
 import { NOT_FOUND_ERROR } from "@/contents/messages/error.message";
 import { saveInputFile } from "@/lib/files/workspaceStorage.file";
 import { readMeta, writeMeta } from "@/lib/files/meta.file";
+import { notFound } from "@/lib/guard/error.guard";
 
 // fsを使うのでNode runtime（blobでもOK）
 export const runtime = "nodejs";

@@ -1,7 +1,7 @@
 import { NOT_FOUND_ERROR } from "@/contents/messages/error.message";
 import { ensureLocalDirs } from "@/lib/files/ensureDirs.file";
 import { readMeta, writeMeta } from "@/lib/files/meta.file";
-import { notFound } from "@/lib/guard/api.guard";
+import { notFound } from "@/lib/guard/error.guard";
 import fs from "node:fs/promises";
 
 export const runtime = "nodejs";
