@@ -4,10 +4,10 @@ import fs from "node:fs/promises";
 import ExcelJS from "exceljs";
 import { reqString } from "@/lib/guard/api.guard";
 import * as ERR from "@/contents/messages/error.message";
-import { isProbablyExcelFile } from "@/lib/files/isProbablyExcelFile.file";
 import { normalizeCellValue } from "@/lib/files/normalizeCellValue.file";
 import { badRequest, notFound } from "@/lib/guard/error.guard";
 import { JsonRow, SheetsJson } from "@/contents/types/excel.type";
+import { isProbablyExcelFile } from "@/lib/files/isProbably.file";
 
 export const runtime = "nodejs";
 

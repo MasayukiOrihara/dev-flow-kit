@@ -1,5 +1,5 @@
 import * as ERR from "@/contents/messages/error.message";
-import { isProbablyTextFile } from "@/lib/files/isProbablyTextFile.file";
+import { isProbablyTextFile } from "@/lib/files/isProbably.file";
 import { readMeta } from "@/lib/files/meta.file";
 import { reqString } from "@/lib/guard/api.guard";
 import { badRequest, notFound } from "@/lib/guard/error.guard";

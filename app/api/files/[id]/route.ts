@@ -64,7 +64,6 @@ export async function DELETE(
   // 1) 実体削除（無くてもOK扱いにする）
   await deleteFromSavedPath(absPath);
 
-  console.log("蟹");
   // 2) メタから削除
   const next = [...list.slice(0, idx), ...list.slice(idx + 1)];
   await writeMeta(next);
