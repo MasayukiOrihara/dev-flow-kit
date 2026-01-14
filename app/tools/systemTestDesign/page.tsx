@@ -3,8 +3,18 @@
 import { Button } from "@/components/ui/button";
 import { postJson } from "@/lib/api/postJson.api";
 import { useEffect, useState } from "react";
-import { FILE_READ_ERROR } from "@/contents/messages/error.message";
+import {
+  FILE_READ_ERROR,
+  GENERATE_ERROR,
+  UNKNOWN_ERROR,
+} from "@/contents/messages/error.message";
 import { SheetsJson } from "@/contents/types/excel.type";
+import {
+  FUNCTIONFILE_READ_COMPLETE,
+  RESULT_GENERATING,
+  SCREENFILE_READ_COMPLETE,
+  SRSFILE_READ_COMPLETE,
+} from "@/contents/messages/logger.message";
 
 export default function SystemTestDesignPage() {
   const [functionFileName, setFunctionFileName] = useState("");
@@ -47,7 +57,7 @@ export default function SystemTestDesignPage() {
         { fileName: functionFileName },
         FILE_READ_ERROR
       );
-      setText("機能一覧表を読み込みました。");
+      setText(FUNCTIONFILE_READ_COMPLETE);
 
       // 2) 要求仕様書（TEXT）読み込み
       const srsFileRes = await postJson<{ text: string }>(
@@ -55,7 +65,7 @@ export default function SystemTestDesignPage() {
         { fileName: srsFileName },
         FILE_READ_ERROR
       );
-      setText("要求仕様書を読み込みました。");
+      setText(SRSFILE_READ_COMPLETE);
 
       // 3) 画面仕様書（EXCEL）読み込み
       const screenFileRes = await postJson<{ sheets: SheetsJson }>(
@@ -63,10 +73,10 @@ export default function SystemTestDesignPage() {
         { fileName: screenFileName },
         FILE_READ_ERROR
       );
-      setText("画面仕様書を読み込みました。");
+      setText(SCREENFILE_READ_COMPLETE);
 
       // 4) 結果生成
-      setText("結果のファイルを生成しています...");
+      setText(RESULT_GENERATING);
       const outputRes = await postJson<{ message: string }>(
         "/api/systemTestDesign",
         {
@@ -75,13 +85,17 @@ export default function SystemTestDesignPage() {
           screenFile: screenFileRes.sheets,
           formatId,
         },
-        "生成に失敗しました"
+        GENERATE_ERROR
       );
       setText(outputRes.message);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (e: any) {
-      console.error(e);
-      setErr(e.message);
+    } catch (e) {
+      if (e instanceof Error) {
+        console.error(e);
+        setErr(e.message);
+      } else {
+        console.error(e);
+        setErr(UNKNOWN_ERROR);
+      }
     } finally {
       setIsRunning(false);
     }

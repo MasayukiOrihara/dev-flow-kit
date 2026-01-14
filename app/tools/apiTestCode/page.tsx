@@ -4,10 +4,18 @@ import { Button } from "@/components/ui/button";
 import { postJson } from "@/lib/api/postJson.api";
 import { useEffect, useState } from "react";
 import { postSSEJson } from "@/lib/api/postSSEJson";
-import { FILE_READ_ERROR } from "@/contents/messages/error.message";
-import { SheetsJson } from "@/contents/types/excel.type";
+import {
+  FILE_READ_ERROR,
+  UNKNOWN_ERROR,
+} from "@/contents/messages/error.message";
+import {
+  CONTROLLERFILE_READ_COMPLETE,
+  PRISMAFILE_READ_COMPLETE,
+  RESULT_GENERATING,
+  SERVICEFILE_READ_COMPLETE,
+} from "@/contents/messages/logger.message";
 
-export default function TestCodePage() {
+export default function apiTestCodePage() {
   const [prismaSchemaName, setPrismaSchemaName] = useState("");
   const [controllerName, setControllerName] = useState("");
   const [serviceName, setServiceName] = useState("");
@@ -49,7 +57,7 @@ export default function TestCodePage() {
         { fileName: prismaSchemaName },
         FILE_READ_ERROR
       );
-      setText("PrismaSchemaファイルを読み込みました。");
+      setText(PRISMAFILE_READ_COMPLETE);
 
       // 2) コントローラーコードファイル読み込み
       const controllerFileRes = await postJson<{ text: string }>(
@@ -57,7 +65,7 @@ export default function TestCodePage() {
         { fileName: controllerName },
         FILE_READ_ERROR
       );
-      setText("コントローラーファイルを読み込みました。");
+      setText(CONTROLLERFILE_READ_COMPLETE);
 
       // 2) サービスファイル読み込み
       const serviceFileRes = await postJson<{ text: string }>(
@@ -65,10 +73,10 @@ export default function TestCodePage() {
         { fileName: serviceName },
         FILE_READ_ERROR
       );
-      setText("サービスファイルを読み込みました。");
+      setText(SERVICEFILE_READ_COMPLETE);
 
       // 3) 結果生成
-      setText("結果のファイルを生成しています...");
+      setText(RESULT_GENERATING);
       setText("");
 
       const payload = {
@@ -85,10 +93,14 @@ export default function TestCodePage() {
           if (evt.delta) setText((prev) => prev + evt.delta);
         }
       });
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (e: any) {
-      console.error(e);
-      setErr(e.message);
+    } catch (e) {
+      if (e instanceof Error) {
+        console.error(e);
+        setErr(e.message);
+      } else {
+        console.error(e);
+        setErr(UNKNOWN_ERROR);
+      }
     } finally {
       setIsRunning(false);
     }
@@ -106,16 +118,20 @@ export default function TestCodePage() {
     try {
       // 出力
       const res = await postJson<{ fileName: string }>(
-        "/api/jestTestCode/exportTSCode",
+        "/api/apiTestCode/dbMap/exportYaml",
         { llmText: text },
         FILE_READ_ERROR
       );
 
       setText(`${res.fileName} を 出力しました`);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (e: any) {
-      console.error(e);
-      setErr(e.message);
+    } catch (e) {
+      if (e instanceof Error) {
+        console.error(e);
+        setErr(e.message);
+      } else {
+        console.error(e);
+        setErr(UNKNOWN_ERROR);
+      }
     } finally {
       setIsRunning(false);
     }

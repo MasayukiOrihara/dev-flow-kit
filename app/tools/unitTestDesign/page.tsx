@@ -1,7 +1,16 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { FILE_READ_ERROR } from "@/contents/messages/error.message";
+import {
+  FILE_READ_ERROR,
+  GENERATE_ERROR,
+  UNKNOWN_ERROR,
+} from "@/contents/messages/error.message";
+import {
+  CODE_READ_COMPLETE,
+  EXCEL_READ_COMPLETE,
+  RESULT_GENERATING,
+} from "@/contents/messages/logger.message";
 import { SheetsJson } from "@/contents/types/excel.type";
 import { postJson } from "@/lib/api/postJson.api";
 import { useEffect, useState } from "react";
@@ -50,7 +59,7 @@ export default function UnitTestDesignPage() {
         { fileName: excelFileName },
         FILE_READ_ERROR
       );
-      setText("Excelファイルを読み込みました。");
+      setText(EXCEL_READ_COMPLETE);
 
       // 2) コードファイル読み込み
       const codeFileRes = await postJson<{ text: string }>(
@@ -58,10 +67,10 @@ export default function UnitTestDesignPage() {
         { fileName: codeFileName },
         FILE_READ_ERROR
       );
-      setText("コードファイルを読み込みました。");
+      setText(CODE_READ_COMPLETE);
 
       // 3) 結果生成
-      setText("結果のファイルを生成しています...");
+      setText(RESULT_GENERATING);
       const outputRes = await postJson<{ message: string }>(
         "/api/unitTestDesign",
         {
@@ -70,12 +79,17 @@ export default function UnitTestDesignPage() {
           classDesign: excelFileRes.sheets,
           formatId,
         },
-        "生成に失敗しました"
+        GENERATE_ERROR
       );
       setText(outputRes.message);
     } catch (e) {
-      console.error(e);
-      setErr("生成に失敗しました");
+      if (e instanceof Error) {
+        console.error(e);
+        setErr(e.message);
+      } else {
+        console.error(e);
+        setErr(UNKNOWN_ERROR);
+      }
     } finally {
       setIsRunning(false);
     }

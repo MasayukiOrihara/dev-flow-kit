@@ -4,8 +4,16 @@ import { Button } from "@/components/ui/button";
 import { postJson } from "@/lib/api/postJson.api";
 import { useEffect, useState } from "react";
 import { postSSEJson } from "@/lib/api/postSSEJson";
-import { FILE_READ_ERROR } from "@/contents/messages/error.message";
+import {
+  FILE_READ_ERROR,
+  UNKNOWN_ERROR,
+} from "@/contents/messages/error.message";
 import { SheetsJson } from "@/contents/types/excel.type";
+import {
+  CODE_READ_COMPLETE,
+  EXCEL_READ_COMPLETE,
+  RESULT_GENERATING,
+} from "@/contents/messages/logger.message";
 
 export default function TestCodePage() {
   const [excelFileName, setExcelFileName] = useState("");
@@ -47,7 +55,7 @@ export default function TestCodePage() {
         { fileName: excelFileName },
         FILE_READ_ERROR
       );
-      setText("Excelファイルを読み込みました。");
+      setText(EXCEL_READ_COMPLETE);
 
       // 2) コードファイル読み込み
       const codeFileRes = await postJson<{ text: string }>(
@@ -55,10 +63,10 @@ export default function TestCodePage() {
         { fileName: codeFileName },
         FILE_READ_ERROR
       );
-      setText("コードファイルを読み込みました。");
+      setText(CODE_READ_COMPLETE);
 
       // 3) 結果生成
-      setText("結果のファイルを生成しています...");
+      setText(RESULT_GENERATING);
       setText("");
 
       const payload = {
@@ -72,10 +80,14 @@ export default function TestCodePage() {
           if (evt.delta) setText((prev) => prev + evt.delta);
         }
       });
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (e: any) {
-      console.error(e);
-      setErr(e.message);
+      if (e instanceof Error) {
+        console.error(e);
+        setErr(e.message);
+      } else {
+        console.error(e);
+        setErr(UNKNOWN_ERROR);
+      }
     } finally {
       setIsRunning(false);
     }
@@ -99,10 +111,14 @@ export default function TestCodePage() {
       );
 
       setText(`${res.fileName} を 出力しました`);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (e: any) {
-      console.error(e);
-      setErr(e.message);
+      if (e instanceof Error) {
+        console.error(e);
+        setErr(e.message);
+      } else {
+        console.error(e);
+        setErr(UNKNOWN_ERROR);
+      }
     } finally {
       setIsRunning(false);
     }

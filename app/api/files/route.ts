@@ -1,8 +1,8 @@
 import { FileMeta } from "@/contents/types/file.type";
-import { NOT_FOUND_ERROR } from "@/contents/messages/error.message";
 import { saveInputFile } from "@/lib/files/workspaceStorage.file";
 import { readMeta, writeMeta } from "@/lib/files/meta.file";
 import { notFound } from "@/lib/guard/error.guard";
+import { FILE_NOT_FOUND } from "@/contents/messages/error.message";
 
 // fsを使うのでNode runtime（blobでもOK）
 export const runtime = "nodejs";
@@ -10,7 +10,7 @@ export const runtime = "nodejs";
 export async function POST(req: Request) {
   const form = await req.formData();
   const files = form.getAll("files");
-  if (!files.length) return notFound(NOT_FOUND_ERROR);
+  if (!files.length) return notFound(FILE_NOT_FOUND);
 
   const metaList = await readMeta();
   const saved: FileMeta[] = [];

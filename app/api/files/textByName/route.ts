@@ -24,7 +24,7 @@ export async function POST(req: Request) {
   const list = await readMeta();
   // 同名が複数ある可能性があるので、最新(uploadedAtが新しい)を優先
   const candidates = list.filter((m) => m.name === fileName);
-  if (candidates.length === 0) return notFound(ERR.NOT_FOUND_ERROR);
+  if (candidates.length === 0) return notFound(ERR.FILE_NOT_FOUND);
 
   // ファイル情報の取得
   const meta = candidates
@@ -35,7 +35,7 @@ export async function POST(req: Request) {
   }
 
   // ファイルの取得
-  if (!meta.savedPath) return notFound(ERR.NOT_FOUND_ERROR);
+  if (!meta.savedPath) return notFound(ERR.FILE_NOT_FOUND);
   const absPath = meta.savedPath;
 
   console.log("コードファイル取得中...");

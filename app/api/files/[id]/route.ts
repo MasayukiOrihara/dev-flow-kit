@@ -1,4 +1,4 @@
-import { NOT_FOUND_ERROR } from "@/contents/messages/error.message";
+import { FILE_NOT_FOUND } from "@/contents/messages/error.message";
 import {
   deleteFromSavedPath,
   readBodyFromSavedPath,
@@ -24,7 +24,7 @@ export async function GET(
   const list = await readMeta();
   const meta = list.find((m) => m.id === id);
 
-  if (!meta || !meta.savedPath) return notFound(NOT_FOUND_ERROR);
+  if (!meta || !meta.savedPath) return notFound(FILE_NOT_FOUND);
 
   const absPath = meta.savedPath;
   const buf = await readBodyFromSavedPath(absPath);
@@ -56,10 +56,10 @@ export async function DELETE(
   const list = await readMeta();
   const idx = list.findIndex((m) => m.id === id);
 
-  if (idx === -1) return notFound(NOT_FOUND_ERROR);
+  if (idx === -1) return notFound(FILE_NOT_FOUND);
 
   const meta = list[idx];
-  if (!meta.savedPath) return notFound(NOT_FOUND_ERROR);
+  if (!meta.savedPath) return notFound(FILE_NOT_FOUND);
 
   const absPath = meta.savedPath;
 

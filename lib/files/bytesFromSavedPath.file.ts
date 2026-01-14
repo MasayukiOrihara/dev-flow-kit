@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import { del } from "@vercel/blob";
 import { isHttpUrl, isVercelBlobUrl } from "../guard/file.guard";
 import { isErrnoException } from "../guard/error.guard";
-import { NOT_FOUND_ERROR } from "@/contents/messages/error.message";
+import { FILE_NOT_FOUND } from "@/contents/messages/error.message";
 
 // 後続処理で “savedPath” からバイナリを取得する最短ヘルパ
 export async function readBodyFromSavedPath(
@@ -38,7 +38,7 @@ export async function deleteFromSavedPath(savedPath: string): Promise<void> {
   } catch (e: unknown) {
     // ファイルが既に無い場合だけ握りつぶす（それ以外は投げる）
     if (isErrnoException(e) && e.code === "ENOENT") {
-      console.warn(NOT_FOUND_ERROR);
+      console.warn(FILE_NOT_FOUND);
       return;
     } else {
       throw e;

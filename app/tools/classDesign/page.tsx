@@ -1,7 +1,10 @@
 "use client";
 
 import { GenerateSection } from "@/components/generateSection";
-import { FILE_READ_ERROR } from "@/contents/messages/error.message";
+import {
+  FILE_READ_ERROR,
+  GENERATE_ERROR,
+} from "@/contents/messages/error.message";
 import { SheetsJson } from "@/contents/types/excel.type";
 import { postJson } from "@/lib/api/postJson.api";
 
@@ -34,7 +37,7 @@ export default function ClassDesignPage() {
             const outputRes = await postJson<{ text: string }>(
               "/api/classDesign/toCode",
               { fileName, codeText: fileRes.text, formatId },
-              "生成に失敗しました"
+              GENERATE_ERROR
             );
 
             return outputRes.text;
@@ -60,7 +63,7 @@ export default function ClassDesignPage() {
             const outputRes = await postJson<{ text: string }>(
               "/api/classDesign/fromFunctionList",
               { fileName, excelJson: screenFileRes.sheets, formatId },
-              "生成に失敗しました"
+              GENERATE_ERROR
             );
             return outputRes.text;
           }}
