@@ -9,14 +9,16 @@ import {
   UNKNOWN_ERROR,
 } from "@/contents/messages/error.message";
 import {
+  CONTROLLERFILE_READ_COMPLETE,
   PRISMAFILE_READ_COMPLETE,
   RESULT_GENERATING,
+  SERVICEFILE_READ_COMPLETE,
 } from "@/contents/messages/logger.message";
 
 export default function apiTestCodePage() {
   const [prismaSchemaName, setPrismaSchemaName] = useState("");
-  const [openApiName, setOpenApiName] = useState("");
-  const [dbMapName, setDBMapName] = useState("");
+  const [controllerName, setControllerName] = useState("");
+  const [serviceName, setServiceName] = useState("");
 
   const [text, setText] = useState("");
   const [err, setErr] = useState("");
@@ -25,6 +27,7 @@ export default function apiTestCodePage() {
     { id: string; label: string; enabled: boolean }[]
   >([]);
   const [formatId, setFormatId] = useState<string>("");
+
   const [isRunning, setIsRunning] = useState(false);
 
   useEffect(() => {
@@ -56,21 +59,21 @@ export default function apiTestCodePage() {
       );
       setText(PRISMAFILE_READ_COMPLETE);
 
-      // 2) openAPIファイル読み込み
-      const openApiFileRes = await postJson<{ text: string }>(
+      // 2) コントローラーコードファイル読み込み
+      const controllerFileRes = await postJson<{ text: string }>(
         "/api/files/textByName",
-        { fileName: openApiName },
+        { fileName: controllerName },
         FILE_READ_ERROR
       );
-      setText("OPEN API ファイルを読み込みました。");
+      setText(CONTROLLERFILE_READ_COMPLETE);
 
-      // 2) DB マップファイル読み込み
-      const dbMapFileRes = await postJson<{ text: string }>(
+      // 2) サービスファイル読み込み
+      const serviceFileRes = await postJson<{ text: string }>(
         "/api/files/textByName",
-        { fileName: dbMapName },
+        { fileName: serviceName },
         FILE_READ_ERROR
       );
-      setText("DB Map ファイルを読み込みました");
+      setText(SERVICEFILE_READ_COMPLETE);
 
       // 3) 結果生成
       setText(RESULT_GENERATING);
@@ -79,13 +82,13 @@ export default function apiTestCodePage() {
       const payload = {
         prismaSchema: prismaSchemaName,
         schemaCode: prismaSchemaRes.text,
-        openApiName,
-        openApiCode: openApiFileRes.text,
-        dbMapName,
-        dbMapCode: dbMapFileRes.text,
+        controllerName,
+        controllerCode: controllerFileRes.text,
+        serviceName,
+        serviceCode: serviceFileRes.text,
         formatId,
       };
-      await postSSEJson("/api/apiTestCode", payload, (evt) => {
+      await postSSEJson("/api/apiTestCode/dbMap", payload, (evt) => {
         if (evt.type === "text-delta" && typeof evt.delta === "string") {
           if (evt.delta) setText((prev) => prev + evt.delta);
         }
@@ -137,11 +140,11 @@ export default function apiTestCodePage() {
   return (
     <div>
       <div>
-        <h1 className="text-xl font-semibold">API テストコード生成</h1>
-        <p className="text-muted-foreground">「API テストコード」を生成する</p>
+        <h1 className="text-xl font-semibold">DBマッピング生成</h1>
+        <p className="text-muted-foreground">「DBマッピング」を生成する</p>
       </div>
       <div>
-        <h2>② APIテストコードを生成</h2>
+        <h2>① DB検証マッピング定義書を生成</h2>
 
         <div className="my-2">
           <h3 className="text-muted-foreground">
@@ -159,20 +162,20 @@ export default function apiTestCodePage() {
               </div>
 
               <div>
-                <p className="text-sm font-bold">open APIコード</p>
+                <p className="text-sm font-bold">controllerのコード</p>
                 <input
                   className="border rounded px-2 py-1"
-                  value={openApiName}
-                  onChange={(e) => setOpenApiName(e.target.value)}
+                  value={controllerName}
+                  onChange={(e) => setControllerName(e.target.value)}
                 />
               </div>
 
               <div>
-                <p className="text-sm font-bold">DB mapコード</p>
+                <p className="text-sm font-bold">Serviceのコード</p>
                 <input
                   className="border rounded px-2 py-1"
-                  value={dbMapName}
-                  onChange={(e) => setDBMapName(e.target.value)}
+                  value={serviceName}
+                  onChange={(e) => setServiceName(e.target.value)}
                 />
               </div>
             </div>

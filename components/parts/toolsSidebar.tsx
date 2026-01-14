@@ -19,6 +19,11 @@ const items: Item[] = [
   },
   { href: "/tools/testCode", label: "単体テストコード", enabled: true },
   {
+    href: "/tools/apiDBMap",
+    label: "DBマッピング仕様",
+    enabled: true,
+  },
+  {
     href: "/tools/apiTestCode",
     label: "APIテストコード",
     enabled: true,
