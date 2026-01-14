@@ -212,7 +212,7 @@ export default function apiTestCodePage() {
                   disabled={isRunning}
                   className="hover:bg-blue-600 ml-2"
                 >
-                  {isRunning ? "処理中..." : "TS コード出力"}
+                  {isRunning ? "処理中..." : "結果ファイル出力"}
                 </Button>
               ) : null}
             </div>

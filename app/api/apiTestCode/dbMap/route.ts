@@ -1,13 +1,10 @@
 import * as ERR from "@/contents/messages/error.message";
 import { OpenAi41 } from "@/contents/models/openai.model";
-import { reqObject, reqString } from "@/lib/guard/api.guard";
+import { reqString } from "@/lib/guard/api.guard";
 import { toUIMessageStream } from "@ai-sdk/langchain";
 import { PromptTemplate } from "@langchain/core/prompts";
 import { createUIMessageStreamResponse } from "ai";
-import {
-  API_TEST_CODE_DIR,
-  TEST_CODE_DIR,
-} from "@/contents/parametars/file.parametar";
+import { API_TEST_CODE_DIR } from "@/contents/parametars/file.parametar";
 import { loadTemplateById } from "@/lib/files/loadTemplateById.file";
 
 /**
