@@ -17,7 +17,12 @@ const items: Item[] = [
     label: "単体テスト仕様書",
     enabled: true,
   },
-  { href: "/tools/testCode", label: "テストコード", enabled: true },
+  { href: "/tools/testCode", label: "単体テストコード", enabled: true },
+  {
+    href: "/tools/apiTestCode",
+    label: "APIテストコード",
+    enabled: true,
+  },
   { href: "/tools/systemTestDesign", label: "総合テスト仕様書", enabled: true },
 ];
 

@@ -23,6 +23,8 @@ export function isProbablyExcelFile(name: string, mime: string) {
  * @returns
  */
 export function isProbablyTextFile(name: string, mime: string) {
+  // prisma ファイルを明示的に許可する
+  if (name.endsWith(".prisma")) return true;
   // mimeがoctet-streamでも拡張子で判断できるようにする
   if (mime.startsWith("text/")) return true;
   return /\.(ts|tsx|js|jsx|json|md|txt|yml|yaml|csv|html|css)$/i.test(name);
