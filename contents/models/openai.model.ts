@@ -12,5 +12,6 @@ export const OpenAi4o = new ChatOpenAI({
 export const OpenAi41 = new ChatOpenAI({
   apiKey: process.env.OPENAI_API_KEY,
   model: "gpt-4.1",
+  temperature: 0.2,
   cache: true,
 });
