@@ -115,7 +115,7 @@ export default function apiTestCodePage() {
     try {
       // 出力
       const res = await postJson<{ fileName: string }>(
-        "/api/apiTestCode/dbMap/exportYaml",
+        "/api/jestTestCode/exportTSCode",
         { llmText: text },
         FILE_READ_ERROR
       );
