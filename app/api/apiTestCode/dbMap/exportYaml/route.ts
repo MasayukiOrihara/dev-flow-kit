@@ -15,19 +15,19 @@ import { notFound } from "@/lib/guard/error.guard";
 
 export async function POST(req: Request) {
   try {
-    const { llmText } = await req.json();
+    const { llmText, fileName } = await req.json();
 
     const id = crypto.randomUUID();
     const outDir = OUTPUT_DIR;
     const nameId = id.replace(/-/g, "").slice(0, 12);
-    const fileName = `api-db-map-${nameId}.yaml`;
+    const outputFileName = `${fileName}-db-map-${nameId}.yaml`;
     const code = extractYamlCodeBlock(llmText);
 
     // ガード
     if (!code) return notFound(CODEBLOCK_NOT_FOUND);
 
     // 念のためファイル名を安全化（パストラバーサル対策）
-    const safeFileName = path.basename(fileName);
+    const safeFileName = path.basename(outputFileName);
     await fs.mkdir(outDir, { recursive: true });
     const filePath = path.join(outDir, safeFileName);
 
@@ -50,7 +50,7 @@ export async function POST(req: Request) {
     metaList.unshift(meta);
     await writeMeta(metaList); // 書き込み
 
-    return NextResponse.json({ fileName });
+    return NextResponse.json({ fileName: safeFileName });
   } catch (err) {
     console.error(err);
     return NextResponse.json({ error: UNKNOWN_ERROR }, { status: 500 });

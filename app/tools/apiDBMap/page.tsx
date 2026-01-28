@@ -20,6 +20,8 @@ export default function apiTestCodePage() {
   const [controllerName, setControllerName] = useState("");
   const [serviceName, setServiceName] = useState("");
 
+  const [dbMapName, setDbMapName] = useState("");
+
   const [text, setText] = useState("");
   const [err, setErr] = useState("");
 
@@ -55,7 +57,7 @@ export default function apiTestCodePage() {
       const prismaSchemaRes = await postJson<{ text: string }>(
         "/api/files/textByName",
         { fileName: prismaSchemaName },
-        FILE_READ_ERROR
+        FILE_READ_ERROR,
       );
       setText(PRISMAFILE_READ_COMPLETE);
 
@@ -63,7 +65,7 @@ export default function apiTestCodePage() {
       const controllerFileRes = await postJson<{ text: string }>(
         "/api/files/textByName",
         { fileName: controllerName },
-        FILE_READ_ERROR
+        FILE_READ_ERROR,
       );
       setText(CONTROLLERFILE_READ_COMPLETE);
 
@@ -71,7 +73,7 @@ export default function apiTestCodePage() {
       const serviceFileRes = await postJson<{ text: string }>(
         "/api/files/textByName",
         { fileName: serviceName },
-        FILE_READ_ERROR
+        FILE_READ_ERROR,
       );
       setText(SERVICEFILE_READ_COMPLETE);
 
@@ -93,6 +95,10 @@ export default function apiTestCodePage() {
           if (evt.delta) setText((prev) => prev + evt.delta);
         }
       });
+
+      // ここでDBマッピング定義ファイル名を指定
+      const tmpName = controllerName.replace(/\.controller\.ts$/, "");
+      setDbMapName(tmpName);
     } catch (e) {
       if (e instanceof Error) {
         console.error(e);
@@ -119,8 +125,8 @@ export default function apiTestCodePage() {
       // 出力
       const res = await postJson<{ fileName: string }>(
         "/api/apiTestCode/dbMap/exportYaml",
-        { llmText: text },
-        FILE_READ_ERROR
+        { fileName: dbMapName, llmText: text },
+        FILE_READ_ERROR,
       );
 
       setText(`${res.fileName} を 出力しました`);
