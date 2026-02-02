@@ -1,87 +1,20 @@
 "use client";
 
 import React, { useMemo, useRef, useState } from "react";
+import { DND_NODE_ID } from "./dndKeys";
+import { DirNode, TreeNode } from "@/contents/types/browser.type";
+import { joinPath } from "@/lib/browser/joinPath.browser";
+import { sortDirChildren } from "@/lib/browser/sortDirChildren.browser";
+import { upsertChildDir } from "@/lib/browser/upsertChildDir.browser";
+import { cloneTree } from "@/lib/browser/cloneTree.browser";
+import { findDirById } from "@/lib/browser/findDirById.browser";
+import { Button } from "@/components/ui/button";
 
-/** ===== Types ===== */
-type TreeNodeBase = {
-  id: string;
-  name: string;
-  path: string; // relative path e.g. "src/controllers"
-};
-
-export type FileNode = TreeNodeBase & {
-  kind: "file";
-  handle: FileSystemFileHandle; // ★ Fileはまだ読まない（遅延ロード）
-  size?: number;
-  lastModified?: number;
-};
-
-export type DirNode = TreeNodeBase & {
-  kind: "directory";
-  handle: FileSystemDirectoryHandle;
-  children: TreeNode[];
-  loaded: boolean; // ★ childrenが走査済みか（遅延ロードで使う）
-};
-
-export type TreeNode = FileNode | DirNode;
-
-/** ===== Helpers ===== */
-const joinPath = (a: string, b: string) => (a ? `${a}/${b}` : b);
-
-function sortDirChildren(dir: DirNode) {
-  dir.children.sort((x, y) => {
-    if (x.kind !== y.kind) return x.kind === "directory" ? -1 : 1;
-    return x.name.localeCompare(y.name, "ja");
-  });
-}
-
-function upsertChildDir(
-  parent: DirNode,
-  name: string,
-  path: string,
-  handle: FileSystemDirectoryHandle,
-) {
-  const existing = parent.children.find(
-    (c) => c.kind === "directory" && c.name === name,
-  ) as DirNode | undefined;
-  if (existing) return existing;
-
-  const newDir: DirNode = {
-    id: crypto.randomUUID(),
-    kind: "directory",
-    name,
-    path,
-    handle,
-    children: [],
-    loaded: false,
-  };
-  parent.children.push(newDir);
-  return newDir;
-}
-
-/** 深いコピー（スキャン中の部分更新用に最低限） */
-function cloneTree(node: DirNode): DirNode {
-  return {
-    ...node,
-    children: node.children.map((c) =>
-      c.kind === "file" ? { ...c } : cloneTree(c),
-    ),
-  };
-}
-
-/** node.id でディレクトリを探す */
-function findDirById(root: DirNode, id: string): DirNode | null {
-  if (root.id === id) return root;
-  for (const c of root.children) {
-    if (c.kind === "directory") {
-      const found = findDirById(c, id);
-      if (found) return found;
-    }
-  }
-  return null;
-}
-
-/** ===== Main Component ===== */
+/**
+ * ディレクトリ構成のファイルを移動するコンポーネント
+ * @param param0
+ * @returns
+ */
 export default function LocalDirectoryTreePicker({
   title = "ローカルフォルダ",
   onPickedRoot,
@@ -207,7 +140,7 @@ export default function LocalDirectoryTreePicker({
 
       // 対策3：段階更新（rootNode をそのまま set するだけでもOKだが、cloneで反映確実に）
       setRoot(cloneTree(rootNode));
-      setStatus("完了（必要に応じてフォルダを展開して読み込みます）");
+      setStatus("完了");
     } catch (err: any) {
       // 対策4：キャンセルは黙って戻る
       if (err?.name === "AbortError") return;
@@ -218,26 +151,6 @@ export default function LocalDirectoryTreePicker({
     }
   };
 
-  const cancelScan = () => {
-    cancelRef.current = true;
-    setStatus("キャンセルしました");
-    setIsScanning(false);
-  };
-
-  const expandAllLoadedOnly = () => {
-    if (!root) return;
-    // 既に loaded なディレクトリだけ開く（全部ロードは重いので避ける）
-    const all = new Set<string>();
-    const dfs = (n: TreeNode) => {
-      if (n.kind === "directory") {
-        all.add(n.id);
-        if (n.loaded) n.children.forEach(dfs);
-      }
-    };
-    dfs(root);
-    setExpanded(all);
-  };
-
   const collapseAll = () => setExpanded(new Set());
 
   const statsText = root
@@ -245,10 +158,10 @@ export default function LocalDirectoryTreePicker({
     : "未選択";
 
   return (
-    <div className="border rounded-lg p-4">
+    <div className="border-r p-2 w-64 h-screen flex flex-col overflow-hidden">
       <div className="flex items-start gap-3">
         <div className="flex-1">
-          <h2 className="font-semibold">{title}</h2>
+          <h2 className="font-semibold text-xs">{title}</h2>
 
           <div className="mt-1 text-xs opacity-70 flex gap-2 flex-wrap items-center">
             <span>{statsText}</span>
@@ -265,57 +178,33 @@ export default function LocalDirectoryTreePicker({
             <input
               value={ignoreText}
               onChange={(e) => setIgnoreText(e.target.value)}
-              className="mt-1 w-full border rounded px-2 py-1 text-sm"
+              className="mt-1 w-full border rounded px-1 py-0.8 text-sm"
               placeholder="node_modules,.git,.next,dist,build"
             />
-            <div className="mt-1 text-xs opacity-60">
-              例：React/Nextプロジェクトなら node_modules / .next
-              を除外推奨（速度が大幅改善）
-            </div>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
-          <button
-            type="button"
+          <Button
             onClick={pickDir}
-            className="px-3 py-2 rounded bg-black text-white text-sm disabled:opacity-40"
+            className="px-2 text-sm disabled:opacity-40"
             disabled={!canPick || isScanning}
           >
-            フォルダ選択
-          </button>
+            📂
+          </Button>
 
-          <button
-            type="button"
-            onClick={cancelScan}
-            className="px-3 py-2 rounded border text-sm disabled:opacity-40"
-            disabled={!isScanning}
-          >
-            Cancel
-          </button>
-
-          <button
-            type="button"
-            onClick={expandAllLoadedOnly}
-            className="px-3 py-2 rounded border text-sm disabled:opacity-40"
-            disabled={!root}
-            title="読み込み済みの範囲だけ展開（全部ロードはしない）"
-          >
-            展開
-          </button>
-
-          <button
-            type="button"
+          <Button
+            variant={"outline"}
             onClick={collapseAll}
-            className="px-3 py-2 rounded border text-sm disabled:opacity-40"
+            className="px-3 text-sm disabled:opacity-40"
             disabled={!root}
           >
-            折りたたみ
-          </button>
+            ⇪
+          </Button>
         </div>
       </div>
 
-      <div className="mt-4 max-h-[60vh] overflow-auto border rounded p-2">
+      <div className="mt-2 overflow-y-auto scrollbar-hidden">
         {!root ? (
           <div className="text-sm opacity-60 p-4">
             フォルダを選択すると階層が表示されます。
@@ -331,7 +220,7 @@ export default function LocalDirectoryTreePicker({
       </div>
 
       {!canPick && (
-        <div className="mt-3 text-xs text-amber-600">
+        <div className="mt-2 text-xs text-amber-600">
           このブラウザは showDirectoryPicker に未対応です（Chrome系推奨）。
         </div>
       )}
@@ -416,22 +305,31 @@ function TreeRow({
 }) {
   const isDir = node.kind === "directory";
   const isOpen = isDir && expanded.has(node.id);
+  const paddingLabel = 6;
 
   return (
-    <div className="select-none" style={{ paddingLeft: `${level * 14}px` }}>
-      <div className="flex items-center gap-2 py-1 hover:bg-muted/40 rounded px-2">
+    <div
+      className="select-none"
+      style={{ paddingLeft: `${level * paddingLabel}px` }}
+      draggable
+      onDragStart={(e) => {
+        e.dataTransfer.setData(DND_NODE_ID, node.id);
+        e.dataTransfer.effectAllowed = "copy";
+      }}
+    >
+      <div className="flex items-center gap-1 hover:bg-muted/40 rounded py-0.2">
         {isDir ? (
           <button
             type="button"
             onClick={() => void onToggle(node.id)}
-            className="w-6 h-6 grid place-items-center rounded hover:bg-muted"
+            className="w-4 h-6 grid place-items-center rounded hover:bg-muted"
             aria-label={isOpen ? "collapse" : "expand"}
             title={node.loaded ? "" : "未読み込み（開くと読み込み）"}
           >
             {isOpen ? "▾" : "▸"}
           </button>
         ) : (
-          <span className="w-6 text-center opacity-40">•</span>
+          <span className="w-4 text-center opacity-40">•</span>
         )}
 
         <span className="font-mono text-sm opacity-70">
@@ -440,11 +338,15 @@ function TreeRow({
 
         <span className="text-sm">{node.name}</span>
 
-        <span className="ml-auto text-xs opacity-50 flex items-center gap-2">
-          {node.kind}
-          {node.kind === "directory" ? (
-            <span className="opacity-60">{node.loaded ? "" : "lazy"}</span>
-          ) : null}
+        <span className="ml-auto text-xs opacity-60 flex items-center gap-1 font-mono">
+          {node.kind === "file" && <span title="File">F</span>}
+
+          {node.kind === "directory" &&
+            (node.loaded ? (
+              <span title="Loaded">L</span>
+            ) : (
+              <span title="Not loaded">…</span>
+            ))}
         </span>
       </div>
 
@@ -453,14 +355,14 @@ function TreeRow({
           {node.children.length === 0 && !node.loaded ? (
             <div
               className="text-xs opacity-60 px-2 py-2"
-              style={{ paddingLeft: `${(level + 1) * 14}px` }}
+              style={{ paddingLeft: `${(level + 1) * paddingLabel}px` }}
             >
               （未読み込み）
             </div>
           ) : node.children.length === 0 ? (
             <div
               className="text-xs opacity-60 px-2 py-2"
-              style={{ paddingLeft: `${(level + 1) * 14}px` }}
+              style={{ paddingLeft: `${(level + 1) * paddingLabel}px` }}
             >
               （空）
             </div>
@@ -479,4 +381,14 @@ function TreeRow({
       )}
     </div>
   );
+}
+
+// LocalDirectoryTreePicker.tsx の loadDirectoryChildren を export にする
+export async function loadDirectoryChildrenForDnD(
+  dir: DirNode,
+  ignoreSet: Set<string>,
+) {
+  // 既存の loadDirectoryChildren を呼ぶだけ
+  await loadDirectoryChildren(dir, ignoreSet, {});
+  // ※ optsは不要でOK（進捗はDropZone側で出す）
 }

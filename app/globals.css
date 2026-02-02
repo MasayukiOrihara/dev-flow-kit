@@ -120,3 +120,13 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* スクロールは有効、バーだけ非表示 */
+.scrollbar-hidden {
+  -ms-overflow-style: none; /* IE, Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+.scrollbar-hidden::-webkit-scrollbar {
+  display: none; /* Chrome, Safari */
+}
