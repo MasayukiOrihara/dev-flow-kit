@@ -15,7 +15,7 @@ import {
   SERVICEFILE_READ_COMPLETE,
 } from "@/contents/messages/logger.message";
 
-export default function apiTestCodePage() {
+export default function ApiTestCodePage() {
   const [prismaSchemaName, setPrismaSchemaName] = useState("");
   const [controllerName, setControllerName] = useState("");
   const [serviceName, setServiceName] = useState("");

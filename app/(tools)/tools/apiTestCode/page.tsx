@@ -13,7 +13,7 @@ import {
   RESULT_GENERATING,
 } from "@/contents/messages/logger.message";
 
-export default function apiTestCodePage() {
+export default function ApiTestCodePage() {
   const [prismaSchemaName, setPrismaSchemaName] = useState("");
   const [openApiName, setOpenApiName] = useState("");
   const [dbMapName, setDBMapName] = useState("");
@@ -52,7 +52,7 @@ export default function apiTestCodePage() {
       const prismaSchemaRes = await postJson<{ text: string }>(
         "/api/files/textByName",
         { fileName: prismaSchemaName },
-        FILE_READ_ERROR
+        FILE_READ_ERROR,
       );
       setText(PRISMAFILE_READ_COMPLETE);
 
@@ -60,7 +60,7 @@ export default function apiTestCodePage() {
       const openApiFileRes = await postJson<{ text: string }>(
         "/api/files/textByName",
         { fileName: openApiName },
-        FILE_READ_ERROR
+        FILE_READ_ERROR,
       );
       setText("OPEN API ファイルを読み込みました。");
 
@@ -68,7 +68,7 @@ export default function apiTestCodePage() {
       const dbMapFileRes = await postJson<{ text: string }>(
         "/api/files/textByName",
         { fileName: dbMapName },
-        FILE_READ_ERROR
+        FILE_READ_ERROR,
       );
       setText("DB Map ファイルを読み込みました");
 
@@ -117,7 +117,7 @@ export default function apiTestCodePage() {
       const res = await postJson<{ fileName: string }>(
         "/api/jestTestCode/exportTSCode",
         { llmText: text },
-        FILE_READ_ERROR
+        FILE_READ_ERROR,
       );
 
       setText(`${res.fileName} を 出力しました`);
