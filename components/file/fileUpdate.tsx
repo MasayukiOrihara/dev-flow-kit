@@ -3,24 +3,15 @@
 import { useEffect, useRef, useState } from "react";
 import { Button } from "../ui/button";
 import { FileSelectButton } from "./fileSelectButton";
-import { FileMeta } from "@/contents/types/file.type";
 import { humanizeMime } from "@/lib/files/isProbably.file";
+import { useWorkspaceFiles } from "../hooks/useWorkspaceFiles";
 
 export default function FileUpdate() {
-  const [files, setFiles] = useState<FileMeta[]>([]);
   const [uploading, setUploading] = useState(false);
+  const { load, files, loading } = useWorkspaceFiles();
 
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const timersRef = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
-
-  /**
-   * ファイルロード処理
-   */
-  const load = async () => {
-    const res = await fetch("/api/files");
-    const json = await res.json();
-    setFiles(json.files ?? []);
-  };
 
   useEffect(() => {
     load();
