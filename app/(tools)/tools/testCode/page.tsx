@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { postJson } from "@/lib/api/postJson.api";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { postSSEJson } from "@/lib/api/postSSEJson";
 import {
   FILE_READ_ERROR,
@@ -14,6 +14,7 @@ import {
   EXCEL_READ_COMPLETE,
   RESULT_GENERATING,
 } from "@/contents/messages/logger.message";
+import { usePromptTemplates } from "@/components/hooks/usePromptTemplates";
 
 export default function TestCodePage() {
   const [excelFileName, setExcelFileName] = useState("");
@@ -21,22 +22,8 @@ export default function TestCodePage() {
   const [text, setText] = useState("");
   const [err, setErr] = useState("");
 
-  const [templates, setTemplates] = useState<
-    { id: string; label: string; enabled: boolean }[]
-  >([]);
-  const [formatId, setFormatId] = useState<string>("");
-
+  const { templates, formatId, setFormatId } = usePromptTemplates("testCode");
   const [isRunning, setIsRunning] = useState(false);
-
-  useEffect(() => {
-    (async () => {
-      const res = await fetch("/api/prompts?kind=testCode");
-      const json = await res.json().catch(() => ({}));
-      setTemplates(json.templates ?? []);
-      if ((json.templates ?? []).length && !formatId)
-        setFormatId(json.templates[0].id);
-    })();
-  }, []);
 
   /**
    * ファイルの読み込み
@@ -53,7 +40,7 @@ export default function TestCodePage() {
       const excelFileRes = await postJson<{ sheets: SheetsJson }>(
         "/api/files/excelToJsonByName",
         { fileName: excelFileName },
-        FILE_READ_ERROR
+        FILE_READ_ERROR,
       );
       setText(EXCEL_READ_COMPLETE);
 
@@ -61,7 +48,7 @@ export default function TestCodePage() {
       const codeFileRes = await postJson<{ text: string }>(
         "/api/files/textByName",
         { fileName: codeFileName },
-        FILE_READ_ERROR
+        FILE_READ_ERROR,
       );
       setText(CODE_READ_COMPLETE);
 
@@ -107,7 +94,7 @@ export default function TestCodePage() {
       const res = await postJson<{ fileName: string }>(
         "/api/jestTestCode/exportTSCode",
         { llmText: text },
-        FILE_READ_ERROR
+        FILE_READ_ERROR,
       );
 
       setText(`${res.fileName} を 出力しました`);

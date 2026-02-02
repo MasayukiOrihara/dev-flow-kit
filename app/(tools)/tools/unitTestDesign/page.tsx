@@ -1,5 +1,6 @@
 "use client";
 
+import { usePromptTemplates } from "@/components/hooks/usePromptTemplates";
 import { Button } from "@/components/ui/button";
 import {
   FILE_READ_ERROR,
@@ -13,7 +14,7 @@ import {
 } from "@/contents/messages/logger.message";
 import { SheetsJson } from "@/contents/types/excel.type";
 import { postJson } from "@/lib/api/postJson.api";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 /**
  * 単体テスト仕様書作成ページ
@@ -25,22 +26,8 @@ export default function UnitTestDesignPage() {
   const [text, setText] = useState("");
   const [err, setErr] = useState("");
 
-  const [templates, setTemplates] = useState<
-    { id: string; label: string; enabled: boolean }[]
-  >([]);
-  const [formatId, setFormatId] = useState<string>("");
-
+  const { templates, formatId, setFormatId } = usePromptTemplates("testDesign");
   const [isRunning, setIsRunning] = useState(false);
-
-  useEffect(() => {
-    (async () => {
-      const res = await fetch("/api/prompts?kind=testDesign");
-      const json = await res.json().catch(() => ({}));
-      setTemplates(json.templates ?? []);
-      if ((json.templates ?? []).length && !formatId)
-        setFormatId(json.templates[0].id);
-    })();
-  }, []);
 
   /**
    * ファイルの読み込み
@@ -57,7 +44,7 @@ export default function UnitTestDesignPage() {
       const excelFileRes = await postJson<{ sheets: SheetsJson }>(
         "/api/files/excelToJsonByName",
         { fileName: excelFileName },
-        FILE_READ_ERROR
+        FILE_READ_ERROR,
       );
       setText(EXCEL_READ_COMPLETE);
 
@@ -65,7 +52,7 @@ export default function UnitTestDesignPage() {
       const codeFileRes = await postJson<{ text: string }>(
         "/api/files/textByName",
         { fileName: codeFileName },
-        FILE_READ_ERROR
+        FILE_READ_ERROR,
       );
       setText(CODE_READ_COMPLETE);
 
@@ -79,7 +66,7 @@ export default function UnitTestDesignPage() {
           classDesign: excelFileRes.sheets,
           formatId,
         },
-        GENERATE_ERROR
+        GENERATE_ERROR,
       );
       setText(outputRes.message);
     } catch (e) {

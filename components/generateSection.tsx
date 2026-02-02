@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Button } from "./ui/button";
 import { isErrnoException } from "@/lib/guard/error.guard";
-import { TemplateItem } from "@/contents/types/prompt.type";
+import { usePromptTemplates } from "./hooks/usePromptTemplates";
 
 export type GenerateSectionRunArgs = {
   fileName: string;
@@ -48,39 +48,13 @@ export function GenerateSection({
   run,
 }: Props) {
   const [fileName, setFileName] = useState("");
-  const [templates, setTemplates] = useState<TemplateItem[]>([]);
-  const [formatId, setFormatId] = useState("");
+  const { templates, formatId, setFormatId } = usePromptTemplates(
+    encodeURIComponent(promptKind),
+  );
 
   const [text, setText] = useState("");
   const [err, setErr] = useState("");
   const [isRunning, setIsRunning] = useState(false);
-
-  // プロンプトの取得
-  useEffect(() => {
-    (async () => {
-      try {
-        const res = await fetch(
-          `/api/prompts?kind=${encodeURIComponent(promptKind)}`
-        );
-        const json = await res.json().catch(() => ({}));
-
-        const list: TemplateItem[] = json.templates ?? [];
-        setTemplates(list);
-
-        if (!formatId && list.length) {
-          const firstEnabled = list.find((t) => t.enabled) ?? list[0];
-          setFormatId(firstEnabled.id);
-        }
-      } catch (e) {
-        console.error(e);
-        if (isErrnoException(e)) {
-          setErr(e.message ?? "プロンプト一覧の取得に失敗しました");
-        } else {
-          setErr("プロンプト一覧の取得に失敗しました");
-        }
-      }
-    })();
-  }, []);
 
   const canRun = useMemo(() => {
     if (isRunning) return false;

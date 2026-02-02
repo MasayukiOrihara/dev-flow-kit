@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { postJson } from "@/lib/api/postJson.api";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   FILE_READ_ERROR,
   GENERATE_ERROR,
@@ -15,6 +15,7 @@ import {
   SCREENFILE_READ_COMPLETE,
   SRSFILE_READ_COMPLETE,
 } from "@/contents/messages/logger.message";
+import { usePromptTemplates } from "@/components/hooks/usePromptTemplates";
 
 export default function SystemTestDesignPage() {
   const [functionFileName, setFunctionFileName] = useState("");
@@ -23,22 +24,8 @@ export default function SystemTestDesignPage() {
   const [text, setText] = useState("");
   const [err, setErr] = useState("");
 
-  const [templates, setTemplates] = useState<
-    { id: string; label: string; enabled: boolean }[]
-  >([]);
-  const [formatId, setFormatId] = useState<string>("");
-
   const [isRunning, setIsRunning] = useState(false);
-
-  useEffect(() => {
-    (async () => {
-      const res = await fetch("/api/prompts?kind=testDesign");
-      const json = await res.json().catch(() => ({}));
-      setTemplates(json.templates ?? []);
-      if ((json.templates ?? []).length && !formatId)
-        setFormatId(json.templates[0].id);
-    })();
-  }, []);
+  const { templates, formatId, setFormatId } = usePromptTemplates("testDesign");
 
   /**
    * ファイルの読み込み
@@ -55,7 +42,7 @@ export default function SystemTestDesignPage() {
       const functionFileRes = await postJson<{ sheets: SheetsJson }>(
         "/api/files/excelToJsonByName",
         { fileName: functionFileName },
-        FILE_READ_ERROR
+        FILE_READ_ERROR,
       );
       setText(FUNCTIONFILE_READ_COMPLETE);
 
@@ -63,7 +50,7 @@ export default function SystemTestDesignPage() {
       const srsFileRes = await postJson<{ text: string }>(
         "/api/files/textByName",
         { fileName: srsFileName },
-        FILE_READ_ERROR
+        FILE_READ_ERROR,
       );
       setText(SRSFILE_READ_COMPLETE);
 
@@ -71,7 +58,7 @@ export default function SystemTestDesignPage() {
       const screenFileRes = await postJson<{ sheets: SheetsJson }>(
         "/api/files/excelToJsonByName",
         { fileName: screenFileName },
-        FILE_READ_ERROR
+        FILE_READ_ERROR,
       );
       setText(SCREENFILE_READ_COMPLETE);
 
@@ -85,7 +72,7 @@ export default function SystemTestDesignPage() {
           screenFile: screenFileRes.sheets,
           formatId,
         },
-        GENERATE_ERROR
+        GENERATE_ERROR,
       );
       setText(outputRes.message);
     } catch (e) {

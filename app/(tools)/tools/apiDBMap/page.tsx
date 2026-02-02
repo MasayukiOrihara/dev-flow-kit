@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { postJson } from "@/lib/api/postJson.api";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { postSSEJson } from "@/lib/api/postSSEJson";
 import {
   FILE_READ_ERROR,
@@ -14,6 +14,7 @@ import {
   RESULT_GENERATING,
   SERVICEFILE_READ_COMPLETE,
 } from "@/contents/messages/logger.message";
+import { usePromptTemplates } from "@/components/hooks/usePromptTemplates";
 
 export default function ApiTestCodePage() {
   const [prismaSchemaName, setPrismaSchemaName] = useState("");
@@ -25,22 +26,9 @@ export default function ApiTestCodePage() {
   const [text, setText] = useState("");
   const [err, setErr] = useState("");
 
-  const [templates, setTemplates] = useState<
-    { id: string; label: string; enabled: boolean }[]
-  >([]);
-  const [formatId, setFormatId] = useState<string>("");
-
+  const { templates, formatId, setFormatId } =
+    usePromptTemplates("apiTestCode");
   const [isRunning, setIsRunning] = useState(false);
-
-  useEffect(() => {
-    (async () => {
-      const res = await fetch("/api/prompts?kind=apiTestCode");
-      const json = await res.json().catch(() => ({}));
-      setTemplates(json.templates ?? []);
-      if ((json.templates ?? []).length && !formatId)
-        setFormatId(json.templates[0].id);
-    })();
-  }, []);
 
   /**
    * ファイルの読み込み
