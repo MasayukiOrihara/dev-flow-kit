@@ -67,7 +67,7 @@ export default function TestCodePage() {
           if (evt.delta) setText((prev) => prev + evt.delta);
         }
       });
-    } catch (e: any) {
+    } catch (e) {
       if (e instanceof Error) {
         console.error(e);
         setErr(e.message);
@@ -98,7 +98,7 @@ export default function TestCodePage() {
       );
 
       setText(`${res.fileName} を 出力しました`);
-    } catch (e: any) {
+    } catch (e) {
       if (e instanceof Error) {
         console.error(e);
         setErr(e.message);
