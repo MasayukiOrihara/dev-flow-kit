@@ -1,6 +1,5 @@
 // app/api/excel-to-json-by-name/route.ts
 import { readMeta } from "@/lib/files/meta.file";
-import fs from "node:fs/promises";
 import ExcelJS from "exceljs";
 import { reqString } from "@/lib/guard/api.guard";
 import * as ERR from "@/contents/messages/error.message";

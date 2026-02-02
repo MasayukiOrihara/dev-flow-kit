@@ -4,7 +4,6 @@ import { isProbablyTextFile } from "@/lib/files/isProbably.file";
 import { readMeta } from "@/lib/files/meta.file";
 import { reqString } from "@/lib/guard/api.guard";
 import { badRequest, notFound } from "@/lib/guard/error.guard";
-import fs from "node:fs/promises";
 
 export const runtime = "nodejs";
 
