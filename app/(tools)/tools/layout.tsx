@@ -1,3 +1,4 @@
+import ModeSwitchFab from "@/components/madeSwitchFab";
 import { ToolsSidebar } from "@/components/parts/toolsSidebar";
 import TopFileBar from "@/components/parts/topFileBar";
 
@@ -21,6 +22,8 @@ export default function ToolsLayout({
 
         <main className="flex-1 p-6 overflow-auto">{children}</main>
       </div>
+
+      <ModeSwitchFab />
     </div>
   );
 }
