@@ -5,13 +5,11 @@ import { Button } from "../ui/button";
 import { FileSelectButton } from "./fileSelectButton";
 import { humanizeMime } from "@/lib/files/isProbably.file";
 import { useWorkspaceFiles } from "../hooks/useWorkspaceFiles";
+import { useClipboardCopy } from "../hooks/useClipboardCopy";
 
 export default function FileUpdate() {
-  const [uploading, setUploading] = useState(false);
-  const { load, files, loading } = useWorkspaceFiles();
-
-  const [copiedId, setCopiedId] = useState<string | null>(null);
-  const timersRef = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
+  const { load, upload, remove, files, uploading } = useWorkspaceFiles();
+  const { copiedId, copyToClipboard } = useClipboardCopy(1200);
 
   useEffect(() => {
     load();
@@ -23,21 +21,16 @@ export default function FileUpdate() {
    * @returns
    */
   const onUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files?.length) return;
+    const files = Array.from(e.target.files ?? []);
+    if (!files.length) return;
 
-    setUploading(true);
     try {
-      const fd = new FormData();
-      for (const f of Array.from(e.target.files)) fd.append("files", f);
-
-      const res = await fetch("/api/files", { method: "POST", body: fd });
-      if (!res.ok) throw new Error("upload failed");
-
-      await load();
+      await upload(files);
       e.target.value = "";
-    } finally {
-      setUploading(false);
+    } catch {
+      alert("upload failed");
     }
+    await load();
   };
 
   /**
@@ -46,29 +39,12 @@ export default function FileUpdate() {
    * @returns
    */
   const onDelete = async (id: string) => {
-    const res = await fetch(`/api/files/${id}`, { method: "DELETE" });
-    if (!res.ok) {
+    try {
+      await remove(id);
+    } catch {
       alert("delete failed");
-      return;
     }
     await load();
-  };
-
-  /**
-   * コピーハンドラ
-   * @param text
-   */
-  const copyToClipboard = async (id: string, name: string) => {
-    await navigator.clipboard.writeText(name);
-    setCopiedId(id);
-
-    // 連打対応：既存タイマーがあれば消して、時間をリセット
-    if (timersRef.current[id]) clearTimeout(timersRef.current[id]);
-
-    timersRef.current[id] = setTimeout(() => {
-      setCopiedId((prev) => (prev === id ? null : prev));
-      delete timersRef.current[id];
-    }, 1200);
   };
 
   return (
