@@ -313,8 +313,10 @@ function TreeRow({
       style={{ paddingLeft: `${level * paddingLabel}px` }}
       draggable
       onDragStart={(e) => {
+        e.stopPropagation();
         e.dataTransfer.setData(DND_NODE_ID, node.id);
         e.dataTransfer.effectAllowed = "copy";
+        e.dataTransfer.setData("text/plain", node.id); // 保険
       }}
     >
       <div className="flex items-center gap-1 hover:bg-muted/40 rounded py-0.2">
