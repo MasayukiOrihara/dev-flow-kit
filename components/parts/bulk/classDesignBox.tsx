@@ -37,14 +37,16 @@ export function ClassDesignBox() {
     fileName: string;
     formatId: string;
   }) => {
+    // 1) コードファイル読み込み
     const fileRes = await postJson<{ text: string }>(
       "/api/files/textByName",
       { fileName },
       FILE_READ_ERROR,
     );
 
+    // 2) 出力処理
     const outputRes = await postJson<{ text: string }>(
-      "/api/classDesign/toCode",
+      "/api/classDesign/toJson",
       { fileName, codeText: fileRes.text, formatId },
       GENERATE_ERROR,
     );
@@ -53,7 +55,7 @@ export function ClassDesignBox() {
   };
 
   /**
-   * ファイルの読み込み
+   * 実行
    * @returns
    */
   const onRun = async () => {
