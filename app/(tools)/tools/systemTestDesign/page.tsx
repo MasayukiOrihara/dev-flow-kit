@@ -17,6 +17,7 @@ import {
 } from "@/contents/messages/logger.message";
 import { usePromptTemplates } from "@/components/hooks/page/usePromptTemplates";
 import { useErrorMessage } from "@/components/hooks/page/useErrorMessage";
+import { UNIT_TEST_DESIGN_PK } from "@/contents/parametars/file.parametar";
 
 export default function SystemTestDesignPage() {
   const [functionFileName, setFunctionFileName] = useState("");
@@ -26,7 +27,8 @@ export default function SystemTestDesignPage() {
   const { err, clearErr, handleError } = useErrorMessage(UNKNOWN_ERROR);
 
   const [isRunning, setIsRunning] = useState(false);
-  const { templates, formatId, setFormatId } = usePromptTemplates("testDesign");
+  const { templates, formatId, setFormatId } =
+    usePromptTemplates(UNIT_TEST_DESIGN_PK);
 
   /**
    * ファイルの読み込み

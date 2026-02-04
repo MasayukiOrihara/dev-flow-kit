@@ -4,7 +4,7 @@ import { reqString } from "@/lib/guard/api.guard";
 import { toUIMessageStream } from "@ai-sdk/langchain";
 import { PromptTemplate } from "@langchain/core/prompts";
 import { createUIMessageStreamResponse } from "ai";
-import { API_TEST_CODE_DIR } from "@/contents/parametars/file.parametar";
+import { DB_MAPPING_DIR } from "@/contents/parametars/file.parametar";
 import { loadTemplateById } from "@/lib/files/loadTemplateById.file";
 
 /**
@@ -28,14 +28,14 @@ export async function POST(req: Request) {
     const controllerName = reqString(
       body,
       "controllerName",
-      ERR.FILENAME_ERROR
+      ERR.FILENAME_ERROR,
     );
     if (controllerName instanceof Response) return controllerName;
     // コードの取得
     const controllerCode = reqString(
       body,
       "controllerCode",
-      ERR.CODETEXT_ERROR
+      ERR.CODETEXT_ERROR,
     );
     if (controllerCode instanceof Response) return controllerCode;
 
@@ -53,7 +53,7 @@ export async function POST(req: Request) {
     /* === === LLM === === */
     console.log("ファイル解析中...");
     // プロンプトの取得
-    const template = await loadTemplateById(formatId, API_TEST_CODE_DIR);
+    const template = await loadTemplateById(formatId, DB_MAPPING_DIR);
 
     const prompt = PromptTemplate.fromTemplate(template);
     const promptVariables = {

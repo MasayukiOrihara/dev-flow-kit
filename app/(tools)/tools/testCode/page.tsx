@@ -16,6 +16,7 @@ import {
 } from "@/contents/messages/logger.message";
 import { usePromptTemplates } from "@/components/hooks/page/usePromptTemplates";
 import { useErrorMessage } from "@/components/hooks/page/useErrorMessage";
+import { UNIT_TEST_CODE_PK } from "@/contents/parametars/file.parametar";
 
 export default function TestCodePage() {
   const [excelFileName, setExcelFileName] = useState("");
@@ -23,7 +24,8 @@ export default function TestCodePage() {
   const [text, setText] = useState("");
   const { err, clearErr, handleError } = useErrorMessage(UNKNOWN_ERROR);
 
-  const { templates, formatId, setFormatId } = usePromptTemplates("testCode");
+  const { templates, formatId, setFormatId } =
+    usePromptTemplates(UNIT_TEST_CODE_PK);
   const [isRunning, setIsRunning] = useState(false);
 
   /**

@@ -16,6 +16,7 @@ import {
 } from "@/contents/messages/logger.message";
 import { usePromptTemplates } from "@/components/hooks/page/usePromptTemplates";
 import { useErrorMessage } from "@/components/hooks/page/useErrorMessage";
+import { DB_MAPPING_PK } from "@/contents/parametars/file.parametar";
 
 export default function ApiTestCodePage() {
   const [prismaSchemaName, setPrismaSchemaName] = useState("");
@@ -26,7 +27,8 @@ export default function ApiTestCodePage() {
   const [text, setText] = useState("");
   const { err, clearErr, handleError } = useErrorMessage(UNKNOWN_ERROR);
 
-  const { templates, formatId, setFormatId } = usePromptTemplates("dbMapping");
+  const { templates, formatId, setFormatId } =
+    usePromptTemplates(DB_MAPPING_PK);
   const [isRunning, setIsRunning] = useState(false);
 
   /**

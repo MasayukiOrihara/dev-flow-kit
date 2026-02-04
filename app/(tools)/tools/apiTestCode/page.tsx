@@ -14,6 +14,7 @@ import {
 } from "@/contents/messages/logger.message";
 import { usePromptTemplates } from "@/components/hooks/page/usePromptTemplates";
 import { useErrorMessage } from "@/components/hooks/page/useErrorMessage";
+import { API_TEST_CODE_PK } from "@/contents/parametars/file.parametar";
 
 export default function ApiTestCodePage() {
   const [prismaSchemaName, setPrismaSchemaName] = useState("");
@@ -24,7 +25,7 @@ export default function ApiTestCodePage() {
   const { err, clearErr, handleError } = useErrorMessage(UNKNOWN_ERROR);
 
   const { templates, formatId, setFormatId } =
-    usePromptTemplates("apiTestCode");
+    usePromptTemplates(API_TEST_CODE_PK);
   const [isRunning, setIsRunning] = useState(false);
 
   /**

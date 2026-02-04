@@ -13,6 +13,7 @@ import {
   EXCEL_READ_COMPLETE,
   RESULT_GENERATING,
 } from "@/contents/messages/logger.message";
+import { UNIT_TEST_DESIGN_PK } from "@/contents/parametars/file.parametar";
 import { SheetsJson } from "@/contents/types/excel.type";
 import { postJson } from "@/lib/api/postJson.api";
 import { useState } from "react";
@@ -27,7 +28,8 @@ export default function UnitTestDesignPage() {
   const [text, setText] = useState("");
   const { err, clearErr, handleError } = useErrorMessage(UNKNOWN_ERROR);
 
-  const { templates, formatId, setFormatId } = usePromptTemplates("testDesign");
+  const { templates, formatId, setFormatId } =
+    usePromptTemplates(UNIT_TEST_DESIGN_PK);
   const [isRunning, setIsRunning] = useState(false);
 
   /**

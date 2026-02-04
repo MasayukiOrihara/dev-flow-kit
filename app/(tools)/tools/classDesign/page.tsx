@@ -5,6 +5,7 @@ import {
   FILE_READ_ERROR,
   GENERATE_ERROR,
 } from "@/contents/messages/error.message";
+import { CLASS_DESIGN_PK } from "@/contents/parametars/file.parametar";
 import { SheetsJson } from "@/contents/types/excel.type";
 import { postJson } from "@/lib/api/postJson.api";
 
@@ -24,20 +25,20 @@ export default function ClassDesignPage() {
         <GenerateSection
           title="① コードから解析"
           description="生成元コードのファイル名と使用するプロンプトを指定してください"
-          promptKind="classDesign"
+          promptKind={CLASS_DESIGN_PK}
           fileNameLabel="ファイル名"
           showResult
           run={async ({ fileName, formatId }) => {
             const fileRes = await postJson<{ text: string }>(
               "/api/files/textByName",
               { fileName },
-              FILE_READ_ERROR
+              FILE_READ_ERROR,
             );
 
             const outputRes = await postJson<{ text: string }>(
               "/api/classDesign/toCode",
               { fileName, codeText: fileRes.text, formatId },
-              GENERATE_ERROR
+              GENERATE_ERROR,
             );
 
             return outputRes.text;
@@ -49,7 +50,7 @@ export default function ClassDesignPage() {
         <GenerateSection
           title="② 「機能一覧表」から生成する"
           description="機能一覧表（EXCEL）のファイル名と使用するプロンプトを指定してください"
-          promptKind="classDesign"
+          promptKind={CLASS_DESIGN_PK}
           fileNameLabel="ファイル名"
           showResult={true}
           run={async ({ fileName, formatId }) => {
@@ -57,13 +58,13 @@ export default function ClassDesignPage() {
             const screenFileRes = await postJson<{ sheets: SheetsJson }>(
               "/api/files/excelToJsonByName",
               { fileName: fileName },
-              FILE_READ_ERROR
+              FILE_READ_ERROR,
             );
 
             const outputRes = await postJson<{ text: string }>(
               "/api/classDesign/fromFunctionList",
               { fileName, excelJson: screenFileRes.sheets, formatId },
-              GENERATE_ERROR
+              GENERATE_ERROR,
             );
             return outputRes.text;
           }}
