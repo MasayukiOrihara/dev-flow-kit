@@ -1,162 +1,46 @@
+// workspaceDropZone.tsx
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { DirNode, TreeNode } from "@/contents/types/browser.type";
+import React, { useEffect } from "react";
+import { DirNode } from "@/contents/types/browser.type";
 import { humanizeMime } from "@/lib/files/isProbably.file";
 import { Button } from "@/components/ui/button";
 import { useWorkspaceFiles } from "@/components/hooks/browser/useWorkspaceFiles";
 import { useClipboardCopy } from "@/components/hooks/browser/useClipboardCopy";
-import { DND_NODE_ID } from "@/contents/parametars/file.parametar";
-
-// LocalDirectoryTreePicker の型を import できる前提（同ファイルにexportしてる想定）
+import { useWorkspaceDrop } from "@/components/hooks/browser/useWorkspaceDrop";
 
 type Props = {
   root: DirNode | null;
-  /** 未ロードのディレクトリをロードする関数（LocalPicker側の loader を流用したい） */
+  /** 未ロードのディレクトリをロードする関数（LocalPicker側の loader を流用） */
   loadDirChildren: (dir: DirNode) => Promise<void>;
 };
 
-export function findNodeById(node: TreeNode, id: string): TreeNode | null {
-  if (node.id === id) return node;
-  if (node.kind !== "directory") return null;
-  for (const c of node.children) {
-    const found = findNodeById(c, id);
-    if (found) return found;
-  }
-  return null;
-}
-
 export default function WorkspaceDropZone({ root, loadDirChildren }: Props) {
-  const [isOver, setIsOver] = useState(false);
-  const [status, setStatus] = useState<string>("");
-
   const { load, upload, remove, files } = useWorkspaceFiles();
   const { copiedId, copyToClipboard } = useClipboardCopy(1200);
 
-  // 全ファイルのロード
+  // 初回ロード（アップロード済み一覧）
   useEffect(() => {
-    load();
-  }, []);
+    void load();
+  }, [load]);
+
+  // input方式と同じアップロード処理（hookに渡す）
+  const uploadFiles = async (filesToUpload: File[]) => {
+    if (!filesToUpload.length) return;
+    await upload(filesToUpload);
+    await load();
+  };
+
+  const { status, isOver, setIsOver, onDrop } = useWorkspaceDrop({
+    root,
+    loadDirChildren,
+    uploadFiles,
+  });
 
   const canDrop = !!root;
 
-  /**
-   * 共通：File[] を /api/files に投げる（input方式と同じ）
-   * @param files
-   * @returns
-   */
-  const uploadFiles = async (files: File[]) => {
-    if (!files.length) return;
-    setStatus(`アップロード準備中… (${files.length}件)`);
-
-    try {
-      setStatus(`アップロード中… 0/${files.length}`);
-      await upload(files);
-    } catch {
-      alert("upload failed");
-    }
-
-    setStatus("反映中…");
-    await load();
-    setStatus("アップロード完了");
-  };
-
-  /**
-   * ディレクトリ配下の FileNode を全部集める（階層保持はしない）
-   * @param dir
-   * @param out
-   */
-  const collectFileNodes = async (dir: any, out: any[]) => {
-    // 未ロードならロード
-    if (!dir.loaded) {
-      await loadDirChildren(dir);
-      dir.loaded = true;
-    }
-    for (const c of dir.children) {
-      if (c.kind === "file") out.push(c);
-      else await collectFileNodes(c, out);
-    }
-  };
-
-  /**
-   * ドロップ時の処理
-   * @param e
-   * @returns
-   */
-  const onDrop = async (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsOver(false);
-
-    console.log(2);
-    console.log();
-
-    if (!root) return;
-    const nodeId = e.dataTransfer.getData(DND_NODE_ID);
-    console.log("node" + nodeId);
-    if (!nodeId) return;
-
-    const node = findNodeById(root, nodeId);
-    console.log(node);
-    if (!node) return;
-
-    // root ガード
-    if (node.id === root.id) {
-      setStatus("ルートは取り込めません（DnDの対象IDが不正です）");
-      return;
-    }
-
-    try {
-      setStatus("準備中…");
-
-      const files: File[] = [];
-
-      if (node.kind === "file") {
-        // FileSystemFileHandle -> File
-        setStatus(`ファイル取得中: ${node.path}`);
-        const file = await node.handle.getFile();
-        files.push(file);
-      } else {
-        // フォルダ：配下の file をぜんぶ取得（階層無視）
-        const fileNodes: any[] = [];
-        await collectFileNodes(node, fileNodes);
-
-        setStatus(`ファイル取得中… 0/${fileNodes.length}`);
-
-        let done = 0;
-        for (const fn of fileNodes) {
-          files.push(await fn.handle.getFile());
-          done += 1;
-          if (done % 20 === 0 || done === fileNodes.length) {
-            setStatus(`ファイル取得中… ${done}/${fileNodes.length}`);
-          }
-        }
-      }
-
-      console.log("a");
-
-      // input方式と同じアップロード
-      await uploadFiles(files);
-    } catch (err) {
-      if (err instanceof Error) {
-        console.error(err.message);
-        setStatus(`アップロード失敗: ${err.message}`);
-      }
-      console.error(err);
-      setStatus(`アップロード失敗: ${String(err)}`);
-    }
-  };
-
-  /**
-   * データ削除API
-   * @param id
-   * @returns
-   */
   const onDelete = async (id: string) => {
-    try {
-      await remove(id);
-    } catch {
-      alert("delete failed");
-    }
+    await remove(id);
     await load();
   };
 
@@ -188,11 +72,12 @@ export default function WorkspaceDropZone({ root, loadDirChildren }: Props) {
 
       {status ? <div className="text-xs opacity-70 mt-3">{status}</div> : null}
 
-      <h2>アップロード済みファイル</h2>
+      <h2 className="mt-4">アップロード済みファイル</h2>
+
       <div className="flex-1 overflow-y-auto scrollbar-hidden">
         <ul className="text-sm">
           {files.map((f) => (
-            <li key={f.id}>
+            <li key={f.id} className="py-1">
               <a href={`/api/files/${f.id}`} target="_blank" rel="noreferrer">
                 {f.name}
               </a>{" "}
@@ -211,7 +96,7 @@ export default function WorkspaceDropZone({ root, loadDirChildren }: Props) {
               <Button
                 variant="default"
                 size="xs"
-                onClick={() => onDelete(f.id)}
+                onClick={() => void onDelete(f.id)}
                 className="hover:bg-red-500 ml-2"
               >
                 削除
