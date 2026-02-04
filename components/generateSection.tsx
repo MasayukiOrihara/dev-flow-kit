@@ -2,8 +2,8 @@
 
 import { useMemo, useState } from "react";
 import { Button } from "./ui/button";
-import { isErrnoException } from "@/lib/guard/error.guard";
 import { usePromptTemplates } from "./hooks/page/usePromptTemplates";
+import { useErrorMessage } from "./hooks/page/useErrorMessage";
 
 export type GenerateSectionRunArgs = {
   fileName: string;
@@ -52,8 +52,8 @@ export function GenerateSection({
     encodeURIComponent(promptKind),
   );
 
+  const { err, clearErr, run: runSafe } = useErrorMessage("処理に失敗しました");
   const [text, setText] = useState("");
-  const [err, setErr] = useState("");
   const [isRunning, setIsRunning] = useState(false);
 
   const canRun = useMemo(() => {
@@ -70,24 +70,18 @@ export function GenerateSection({
   const onRun = async () => {
     if (!canRun) return;
 
-    setErr("");
+    clearErr();
     if (showResult) setText("");
     setIsRunning(true);
 
     try {
-      const resultText = await run({
-        fileName: fileName.trim(),
-        formatId,
-      });
-
+      const resultText = await runSafe(() =>
+        run({
+          fileName: fileName.trim(),
+          formatId,
+        }),
+      );
       if (showResult) setText(resultText ?? "");
-    } catch (e) {
-      console.error(e);
-      if (isErrnoException(e)) {
-        setErr(e.message ?? "処理に失敗しました");
-      } else {
-        setErr("処理に失敗しました");
-      }
     } finally {
       setIsRunning(false);
     }

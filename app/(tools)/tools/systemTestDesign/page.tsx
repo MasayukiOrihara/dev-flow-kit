@@ -16,13 +16,14 @@ import {
   SRSFILE_READ_COMPLETE,
 } from "@/contents/messages/logger.message";
 import { usePromptTemplates } from "@/components/hooks/page/usePromptTemplates";
+import { useErrorMessage } from "@/components/hooks/page/useErrorMessage";
 
 export default function SystemTestDesignPage() {
   const [functionFileName, setFunctionFileName] = useState("");
   const [srsFileName, setSRSFileName] = useState("");
   const [screenFileName, setScreenFileName] = useState("");
   const [text, setText] = useState("");
-  const [err, setErr] = useState("");
+  const { err, clearErr, handleError } = useErrorMessage(UNKNOWN_ERROR);
 
   const [isRunning, setIsRunning] = useState(false);
   const { templates, formatId, setFormatId } = usePromptTemplates("testDesign");
@@ -33,7 +34,7 @@ export default function SystemTestDesignPage() {
    */
   const load = async () => {
     if (isRunning) return;
-    setErr("");
+    clearErr();
     setText("");
     setIsRunning(true);
 
@@ -76,13 +77,7 @@ export default function SystemTestDesignPage() {
       );
       setText(outputRes.message);
     } catch (e) {
-      if (e instanceof Error) {
-        console.error(e);
-        setErr(e.message);
-      } else {
-        console.error(e);
-        setErr(UNKNOWN_ERROR);
-      }
+      handleError(e);
     } finally {
       setIsRunning(false);
     }

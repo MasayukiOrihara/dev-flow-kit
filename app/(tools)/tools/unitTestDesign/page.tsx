@@ -1,5 +1,6 @@
 "use client";
 
+import { useErrorMessage } from "@/components/hooks/page/useErrorMessage";
 import { usePromptTemplates } from "@/components/hooks/page/usePromptTemplates";
 import { Button } from "@/components/ui/button";
 import {
@@ -24,7 +25,7 @@ export default function UnitTestDesignPage() {
   const [excelFileName, setExcelFileName] = useState("");
   const [codeFileName, setCodeFileName] = useState("");
   const [text, setText] = useState("");
-  const [err, setErr] = useState("");
+  const { err, clearErr, handleError } = useErrorMessage(UNKNOWN_ERROR);
 
   const { templates, formatId, setFormatId } = usePromptTemplates("testDesign");
   const [isRunning, setIsRunning] = useState(false);
@@ -35,7 +36,7 @@ export default function UnitTestDesignPage() {
    */
   const load = async () => {
     if (isRunning) return;
-    setErr("");
+    clearErr();
     setText("");
     setIsRunning(true);
 
@@ -70,13 +71,7 @@ export default function UnitTestDesignPage() {
       );
       setText(outputRes.message);
     } catch (e) {
-      if (e instanceof Error) {
-        console.error(e);
-        setErr(e.message);
-      } else {
-        console.error(e);
-        setErr(UNKNOWN_ERROR);
-      }
+      handleError(e);
     } finally {
       setIsRunning(false);
     }

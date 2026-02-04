@@ -15,6 +15,7 @@ import {
   SERVICEFILE_READ_COMPLETE,
 } from "@/contents/messages/logger.message";
 import { usePromptTemplates } from "@/components/hooks/page/usePromptTemplates";
+import { useErrorMessage } from "@/components/hooks/page/useErrorMessage";
 
 export default function ApiTestCodePage() {
   const [prismaSchemaName, setPrismaSchemaName] = useState("");
@@ -24,7 +25,7 @@ export default function ApiTestCodePage() {
   const [dbMapName, setDbMapName] = useState("");
 
   const [text, setText] = useState("");
-  const [err, setErr] = useState("");
+  const { err, clearErr, handleError } = useErrorMessage(UNKNOWN_ERROR);
 
   const { templates, formatId, setFormatId } =
     usePromptTemplates("apiTestCode");
@@ -36,7 +37,7 @@ export default function ApiTestCodePage() {
    */
   const load = async () => {
     if (isRunning) return;
-    setErr("");
+    clearErr();
     setText("");
     setIsRunning(true);
 
@@ -88,13 +89,7 @@ export default function ApiTestCodePage() {
       const tmpName = controllerName.replace(/\.controller\.ts$/, "");
       setDbMapName(tmpName);
     } catch (e) {
-      if (e instanceof Error) {
-        console.error(e);
-        setErr(e.message);
-      } else {
-        console.error(e);
-        setErr(UNKNOWN_ERROR);
-      }
+      handleError(e);
     } finally {
       setIsRunning(false);
     }
@@ -106,7 +101,7 @@ export default function ApiTestCodePage() {
    */
   const exportCode = async () => {
     if (isRunning) return;
-    setErr("");
+    clearErr();
     setIsRunning(true);
 
     try {
@@ -119,13 +114,7 @@ export default function ApiTestCodePage() {
 
       setText(`${res.fileName} を 出力しました`);
     } catch (e) {
-      if (e instanceof Error) {
-        console.error(e);
-        setErr(e.message);
-      } else {
-        console.error(e);
-        setErr(UNKNOWN_ERROR);
-      }
+      handleError(e);
     } finally {
       setIsRunning(false);
     }

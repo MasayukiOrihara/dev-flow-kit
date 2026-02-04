@@ -4,8 +4,10 @@ import { useCallback, useState } from "react";
 export function useErrorMessage(defaultMessage = "処理に失敗しました") {
   const [err, setErr] = useState<string | null>(null);
 
+  // エラー内容のクリア
   const clearErr = useCallback(() => setErr(null), []);
 
+  // エラー文字処理
   const handleError = useCallback(
     (e: unknown, overrideMessage?: string) => {
       console.error(e);
@@ -14,7 +16,7 @@ export function useErrorMessage(defaultMessage = "処理に失敗しました") 
     [defaultMessage],
   );
 
-  // async を包む（try/catchを消すやつ）
+  // async を包む（try/catchを消すやつ）: ほぼ単一関数用、handle 使った方が可読性はいいです
   const run = useCallback(
     async <T>(fn: () => Promise<T>, overrideMessage?: string) => {
       try {
