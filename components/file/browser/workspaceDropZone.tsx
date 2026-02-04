@@ -28,25 +28,6 @@ function findNodeById(root: DirNode, id: string): TreeNode | null {
   return null;
 }
 
-async function importFileToWorkspace(
-  fileHandle: FileSystemFileHandle,
-  relativePath: string,
-) {
-  const file = await fileHandle.getFile();
-  const fd = new FormData();
-  fd.append("file", file);
-  fd.append("relativePath", relativePath);
-
-  const res = await fetch("/api/workspace/inputs/import", {
-    method: "POST",
-    body: fd,
-  });
-  if (!res.ok) {
-    const text = await res.text().catch(() => "");
-    throw new Error(`import failed: ${res.status} ${text}`);
-  }
-}
-
 export default function WorkspaceDropZone({ root, loadDirChildren }: Props) {
   const [isOver, setIsOver] = useState(false);
   const [status, setStatus] = useState<string>("");
