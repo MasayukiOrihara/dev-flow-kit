@@ -100,6 +100,11 @@ export default function WorkspaceDropZone({ root, loadDirChildren }: Props) {
     }
   };
 
+  /**
+   * ドロップ時の処理
+   * @param e
+   * @returns
+   */
   const onDrop = async (e: React.DragEvent) => {
     e.preventDefault();
     setIsOver(false);
@@ -110,6 +115,12 @@ export default function WorkspaceDropZone({ root, loadDirChildren }: Props) {
 
     const node = findNodeById(root, nodeId);
     if (!node) return;
+
+    // root ガード
+    if (node.id === root.id) {
+      setStatus("ルートは取り込めません（DnDの対象IDが不正です）");
+      return;
+    }
 
     try {
       setStatus("準備中…");
@@ -140,9 +151,13 @@ export default function WorkspaceDropZone({ root, loadDirChildren }: Props) {
 
       // input方式と同じアップロード
       await uploadFiles(files);
-    } catch (err: any) {
+    } catch (err) {
+      if (err instanceof Error) {
+        console.error(err.message);
+        setStatus(`アップロード失敗: ${err.message}`);
+      }
       console.error(err);
-      setStatus(`アップロード失敗: ${err?.message ?? String(err)}`);
+      setStatus(`アップロード失敗: ${String(err)}`);
     }
   };
 
