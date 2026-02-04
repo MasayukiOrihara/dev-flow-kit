@@ -14,7 +14,7 @@ import {
   RESULT_GENERATING,
   SERVICEFILE_READ_COMPLETE,
 } from "@/contents/messages/logger.message";
-import { usePromptTemplates } from "@/components/hooks/usePromptTemplates";
+import { usePromptTemplates } from "@/components/hooks/page/usePromptTemplates";
 
 export default function ApiTestCodePage() {
   const [prismaSchemaName, setPrismaSchemaName] = useState("");

@@ -8,7 +8,7 @@ import { upsertChildDir } from "@/lib/browser/upsertChildDir.browser";
 import { cloneTree } from "@/lib/browser/cloneTree.browser";
 import { findDirById } from "@/lib/browser/findDirById.browser";
 import { Button } from "@/components/ui/button";
-import { useIgnoreSet } from "@/components/hooks/useIgnoreSet";
+import { useIgnoreSet } from "@/components/hooks/browser/useIgnoreSet";
 import { DND_NODE_ID } from "@/contents/parametars/file.parametar";
 
 /**

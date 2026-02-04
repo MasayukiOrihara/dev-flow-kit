@@ -15,7 +15,7 @@ import {
   SCREENFILE_READ_COMPLETE,
   SRSFILE_READ_COMPLETE,
 } from "@/contents/messages/logger.message";
-import { usePromptTemplates } from "@/components/hooks/usePromptTemplates";
+import { usePromptTemplates } from "@/components/hooks/page/usePromptTemplates";
 
 export default function SystemTestDesignPage() {
   const [functionFileName, setFunctionFileName] = useState("");

@@ -6,7 +6,7 @@ import LocalDirectoryTreePicker, {
   loadDirectoryChildrenForDnD,
 } from "../file/browser/localDirectoryTreePicker";
 import { DirNode } from "@/contents/types/browser.type";
-import { useIgnoreSet } from "../hooks/useIgnoreSet";
+import { useIgnoreSet } from "../hooks/browser/useIgnoreSet";
 
 export default function BulkWorkspaceImportClient() {
   const [root, setRoot] = useState<DirNode | null>(null);

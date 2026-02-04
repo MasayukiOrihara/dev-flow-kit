@@ -1,6 +1,6 @@
 "use client";
 
-import { usePromptTemplates } from "@/components/hooks/usePromptTemplates";
+import { usePromptTemplates } from "@/components/hooks/page/usePromptTemplates";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 

@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { Button } from "./ui/button";
 import { isErrnoException } from "@/lib/guard/error.guard";
-import { usePromptTemplates } from "./hooks/usePromptTemplates";
+import { usePromptTemplates } from "./hooks/page/usePromptTemplates";
 
 export type GenerateSectionRunArgs = {
   fileName: string;

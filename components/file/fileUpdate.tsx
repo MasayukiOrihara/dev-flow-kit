@@ -4,8 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { Button } from "../ui/button";
 import { FileSelectButton } from "./fileSelectButton";
 import { humanizeMime } from "@/lib/files/isProbably.file";
-import { useWorkspaceFiles } from "../hooks/useWorkspaceFiles";
-import { useClipboardCopy } from "../hooks/useClipboardCopy";
+import { useWorkspaceFiles } from "../hooks/browser/useWorkspaceFiles";
+import { useClipboardCopy } from "../hooks/browser/useClipboardCopy";
 
 export default function FileUpdate() {
   const { load, upload, remove, files, uploading } = useWorkspaceFiles();

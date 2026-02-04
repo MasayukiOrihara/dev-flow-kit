@@ -4,8 +4,8 @@ import React, { useEffect, useState } from "react";
 import { DirNode, TreeNode } from "@/contents/types/browser.type";
 import { humanizeMime } from "@/lib/files/isProbably.file";
 import { Button } from "@/components/ui/button";
-import { useWorkspaceFiles } from "@/components/hooks/useWorkspaceFiles";
-import { useClipboardCopy } from "@/components/hooks/useClipboardCopy";
+import { useWorkspaceFiles } from "@/components/hooks/browser/useWorkspaceFiles";
+import { useClipboardCopy } from "@/components/hooks/browser/useClipboardCopy";
 import { DND_NODE_ID } from "@/contents/parametars/file.parametar";
 
 // LocalDirectoryTreePicker の型を import できる前提（同ファイルにexportしてる想定）
