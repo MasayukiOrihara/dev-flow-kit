@@ -47,6 +47,10 @@ export default function LocalDirectoryTreePicker({
     );
   }, []);
 
+  useEffect(() => {
+    if (root) onPickedRoot?.(root);
+  }, [root, onPickedRoot]);
+
   const toggle = async (id: string) => {
     setExpanded((prev) => {
       const next = new Set(prev);
@@ -74,6 +78,10 @@ export default function LocalDirectoryTreePicker({
       });
       sortDirChildren(dir);
       dir.loaded = true;
+
+      console.log("next: ");
+      console.log(nextRoot);
+
       setRoot(nextRoot);
     }
   };

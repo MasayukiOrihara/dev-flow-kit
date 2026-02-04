@@ -16,14 +16,12 @@ type Props = {
   loadDirChildren: (dir: DirNode) => Promise<void>;
 };
 
-function findNodeById(root: DirNode, id: string): TreeNode | null {
-  if (root.id === id) return root;
-  for (const c of root.children) {
-    if (c.id === id) return c;
-    if (c.kind === "directory") {
-      const found = findNodeById(c, id);
-      if (found) return found;
-    }
+export function findNodeById(node: TreeNode, id: string): TreeNode | null {
+  if (node.id === id) return node;
+  if (node.kind !== "directory") return null;
+  for (const c of node.children) {
+    const found = findNodeById(c, id);
+    if (found) return found;
   }
   return null;
 }
@@ -89,11 +87,16 @@ export default function WorkspaceDropZone({ root, loadDirChildren }: Props) {
     e.preventDefault();
     setIsOver(false);
 
+    console.log(2);
+    console.log();
+
     if (!root) return;
     const nodeId = e.dataTransfer.getData(DND_NODE_ID);
+    console.log("node" + nodeId);
     if (!nodeId) return;
 
     const node = findNodeById(root, nodeId);
+    console.log(node);
     if (!node) return;
 
     // root ガード
@@ -128,6 +131,8 @@ export default function WorkspaceDropZone({ root, loadDirChildren }: Props) {
           }
         }
       }
+
+      console.log("a");
 
       // input方式と同じアップロード
       await uploadFiles(files);
