@@ -1,7 +1,6 @@
-// import LocalDirectoryTreePicker from "@/components/file/browser/LocalDirectoryTreePicker";
-import LocalDirectoryTreePickerClient from "@/components/client/LocalDirectoryTreePickerClient";
-import LocalPicker from "@/components/file/browser/localFilePicker";
+import BulkWorkspaceImportClient from "@/components/client/bulkWorkspaceImportClient";
 import ModeSwitchFab from "@/components/madeSwitchFab";
+import { BulkSidebar } from "@/components/parts/bulkSidebar";
 
 export default function BulkLayout({
   children,
@@ -10,7 +9,12 @@ export default function BulkLayout({
 }) {
   return (
     <div className="h-screen flex flex-row">
-      <LocalDirectoryTreePickerClient />
+      {/* フォルダ読み込み + ローカルフォルダ参照 */}
+      <BulkWorkspaceImportClient />
+
+      <aside className="w-48 border-r p-3 overflow-auto">
+        <BulkSidebar />
+      </aside>
 
       <main className="flex-1 p-6 overflow-auto">{children}</main>
       <ModeSwitchFab />
