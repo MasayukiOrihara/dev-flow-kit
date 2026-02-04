@@ -1,3 +1,5 @@
+import { DBMappingBox } from "@/components/parts/bulk/dbMappingBox";
+
 export default function ApiTestCodePage() {
   return (
     <div className="flex flex-col h-full overflow-hidden">
@@ -6,7 +8,9 @@ export default function ApiTestCodePage() {
         <p className="text-muted-foreground">ここに生成UIを置く</p>
       </header>
 
-      <div className="flex h-full gap-2 min-w-0"></div>
+      <div className="flex h-full gap-2 min-w-0">
+        <DBMappingBox />
+      </div>
     </div>
   );
 }

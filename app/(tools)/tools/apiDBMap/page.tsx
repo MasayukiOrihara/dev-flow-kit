@@ -21,14 +21,12 @@ export default function ApiTestCodePage() {
   const [prismaSchemaName, setPrismaSchemaName] = useState("");
   const [controllerName, setControllerName] = useState("");
   const [serviceName, setServiceName] = useState("");
-
   const [dbMapName, setDbMapName] = useState("");
 
   const [text, setText] = useState("");
   const { err, clearErr, handleError } = useErrorMessage(UNKNOWN_ERROR);
 
-  const { templates, formatId, setFormatId } =
-    usePromptTemplates("apiTestCode");
+  const { templates, formatId, setFormatId } = usePromptTemplates("dbMapping");
   const [isRunning, setIsRunning] = useState(false);
 
   /**
