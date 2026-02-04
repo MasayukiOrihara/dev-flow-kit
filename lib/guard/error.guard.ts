@@ -17,3 +17,14 @@ export function isErrnoException(e: unknown): e is NodeJS.ErrnoException {
     typeof (e as { code?: unknown }).code === "string"
   );
 }
+
+/**
+ * エラーメッセージ出力
+ * @param e
+ * @param fallback
+ * @returns
+ */
+export function getErrorMessage(e: unknown, fallback = "処理に失敗しました") {
+  if (isErrnoException(e)) return e.message ?? fallback;
+  return fallback;
+}
