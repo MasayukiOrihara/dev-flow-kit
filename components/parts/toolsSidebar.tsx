@@ -1,15 +1,9 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { SidebarItem } from "@/contents/types/parts.type";
+import { CommonSidebar } from "../common/commonSidebar";
 
-type Item = {
-  href: string;
-  label: string;
-  enabled: boolean; // ← 未実装は false
-};
-
-const items: Item[] = [
+const items: SidebarItem[] = [
   { href: "/tools/plan", label: "計画書", enabled: false },
   { href: "/tools/classDesign", label: "クラス仕様書", enabled: true },
   {
@@ -32,44 +26,5 @@ const items: Item[] = [
 ];
 
 export function ToolsSidebar() {
-  const pathname = usePathname();
-
-  return (
-    <nav className="space-y-1">
-      {items.map((it) => {
-        const active = pathname === it.href;
-
-        const base = "block w-full text-left rounded px-3 py-2 transition";
-        const enabledCls = active ? "bg-muted font-medium" : "hover:bg-muted";
-        const disabledCls =
-          "text-muted-foreground opacity-60 cursor-not-allowed";
-
-        if (!it.enabled) {
-          // 未実装：クリック不可
-          return (
-            <button
-              key={it.href}
-              type="button"
-              className={`${base} ${disabledCls}`}
-              disabled
-              title="準備中"
-            >
-              {it.label}
-            </button>
-          );
-        }
-
-        // 実装済：リンク
-        return (
-          <Link
-            key={it.href}
-            href={it.href}
-            className={`${base} ${enabledCls}`}
-          >
-            {it.label}
-          </Link>
-        );
-      })}
-    </nav>
-  );
+  return <CommonSidebar items={items} />;
 }
