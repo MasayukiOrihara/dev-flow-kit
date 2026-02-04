@@ -1,6 +1,11 @@
 import { useCallback, useMemo, useState } from "react";
 
-export type FileType = "prismaSchema" | "controller" | "service" | "dbMap";
+export type FileType =
+  | "prismaSchema"
+  | "controller"
+  | "service"
+  | "dbMap"
+  | "openAPI";
 
 export type FileNames = Record<FileType, string>;
 
@@ -9,6 +14,7 @@ const initialFileNames: FileNames = {
   controller: "",
   service: "",
   dbMap: "",
+  openAPI: "",
 };
 
 export function useFileNames(initial?: Partial<FileNames>) {

@@ -1,3 +1,4 @@
+import { ApiTestCodeBox } from "@/components/parts/bulk/apiTestCodeBox";
 import { DBMappingBox } from "@/components/parts/bulk/dbMappingBox";
 
 export default function ApiTestCodePage() {
@@ -10,6 +11,7 @@ export default function ApiTestCodePage() {
 
       <div className="flex h-full gap-2 min-w-0">
         <DBMappingBox />
+        <ApiTestCodeBox />
       </div>
     </div>
   );
