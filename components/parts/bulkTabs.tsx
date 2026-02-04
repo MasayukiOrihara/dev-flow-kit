@@ -1,7 +1,7 @@
 "use client";
 
 import { SidebarItem } from "@/contents/types/parts.type";
-import { CommonSidebar } from "../common/commonSidebar";
+import { CommonTabs } from "../common/commonTabs";
 
 const items: SidebarItem[] = [
   { href: "/bulk/plan", label: "計画書", enabled: false },
@@ -9,6 +9,6 @@ const items: SidebarItem[] = [
   { href: "/bulk/apiTestCode", label: "APIテストコード", enabled: true },
 ];
 
-export function BulkSidebar() {
-  return <CommonSidebar items={items} />;
+export function BulkTabs() {
+  return <CommonTabs items={items} />;
 }

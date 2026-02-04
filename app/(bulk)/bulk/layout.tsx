@@ -1,6 +1,7 @@
 import BulkWorkspaceImportClient from "@/components/client/bulkWorkspaceImportClient";
 import ModeSwitchFab from "@/components/madeSwitchFab";
 import { BulkSidebar } from "@/components/parts/bulkSidebar";
+import { BulkTabs } from "@/components/parts/bulkTabs";
 
 export default function BulkLayout({
   children,
@@ -12,11 +13,11 @@ export default function BulkLayout({
       {/* フォルダ読み込み + ローカルフォルダ参照 */}
       <BulkWorkspaceImportClient />
 
-      <aside className="w-48 border-r p-3 overflow-auto">
-        <BulkSidebar />
-      </aside>
+      <div className="flex flex-col w-full overflow-hidden">
+        <BulkTabs />
+        <main className="flex-1 p-6 overflow-auto">{children}</main>
+      </div>
 
-      <main className="flex-1 p-6 overflow-auto">{children}</main>
       <ModeSwitchFab />
     </div>
   );
