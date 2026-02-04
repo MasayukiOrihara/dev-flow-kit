@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { DND_NODE_ID } from "./dndKeys";
 import { DirNode, TreeNode } from "@/contents/types/browser.type";
 import { joinPath } from "@/lib/browser/joinPath.browser";
@@ -24,6 +24,7 @@ export default function LocalDirectoryTreePicker({
 }) {
   const [root, setRoot] = useState<DirNode | null>(null);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  const [canPick, setCanPick] = useState(false);
 
   // 対策4：読み込み中UI
   const [isScanning, setIsScanning] = useState(false);
@@ -55,9 +56,13 @@ export default function LocalDirectoryTreePicker({
     );
   }, [ignoreText]);
 
-  const canPick =
-    typeof window !== "undefined" &&
-    typeof (window as any).showDirectoryPicker === "function";
+  // ブラウザの pick 判定
+  useEffect(() => {
+    setCanPick(
+      typeof window !== "undefined" &&
+        typeof (window as any).showDirectoryPicker === "function",
+    );
+  }, []);
 
   const toggle = async (id: string) => {
     setExpanded((prev) => {
