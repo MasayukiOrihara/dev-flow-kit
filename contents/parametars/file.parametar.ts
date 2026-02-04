@@ -27,3 +27,6 @@ export const CLASS_DESIGN_DIR = path.join(PROMPT_DIR, "classDesign");
 export const TEST_DESIGN_DIR = path.join(PROMPT_DIR, "testDesign");
 export const TEST_CODE_DIR = path.join(PROMPT_DIR, "testCode");
 export const API_TEST_CODE_DIR = path.join(PROMPT_DIR, "apiTestCode");
+
+// キー
+export const DND_NODE_ID = "application/x-local-node-id";

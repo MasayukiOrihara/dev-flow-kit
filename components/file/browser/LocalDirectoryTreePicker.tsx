@@ -1,7 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import { DND_NODE_ID } from "./dndKeys";
+import React, { useEffect, useRef, useState } from "react";
 import { DirNode, TreeNode } from "@/contents/types/browser.type";
 import { joinPath } from "@/lib/browser/joinPath.browser";
 import { sortDirChildren } from "@/lib/browser/sortDirChildren.browser";
@@ -10,6 +9,7 @@ import { cloneTree } from "@/lib/browser/cloneTree.browser";
 import { findDirById } from "@/lib/browser/findDirById.browser";
 import { Button } from "@/components/ui/button";
 import { useIgnoreSet } from "@/components/hooks/useIgnoreSet";
+import { DND_NODE_ID } from "@/contents/parametars/file.parametar";
 
 /**
  * ディレクトリ構成のファイルを移動するコンポーネント
