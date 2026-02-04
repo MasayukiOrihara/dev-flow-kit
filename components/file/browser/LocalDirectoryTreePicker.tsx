@@ -9,6 +9,7 @@ import { upsertChildDir } from "@/lib/browser/upsertChildDir.browser";
 import { cloneTree } from "@/lib/browser/cloneTree.browser";
 import { findDirById } from "@/lib/browser/findDirById.browser";
 import { Button } from "@/components/ui/button";
+import { useIgnoreSet } from "@/components/hooks/useIgnoreSet";
 
 /**
  * ディレクトリ構成のファイルを移動するコンポーネント
@@ -26,35 +27,17 @@ export default function LocalDirectoryTreePicker({
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [canPick, setCanPick] = useState(false);
 
-  // 対策4：読み込み中UI
+  // 読み込み時間対策4：読み込み中UI
   const [isScanning, setIsScanning] = useState(false);
   const [status, setStatus] = useState<string>("");
   const [scannedDirs, setScannedDirs] = useState(0);
   const [scannedFiles, setScannedFiles] = useState(0);
 
-  // 対策4：キャンセル
+  // 読み込み時間対策4：キャンセル
   const cancelRef = useRef(false);
 
-  // 対策1：除外フォルダ（UIで編集可）
-  const [ignoreText, setIgnoreText] = useState(
-    [
-      "node_modules",
-      ".git",
-      ".next",
-      "dist",
-      "build",
-      "coverage",
-      ".turbo",
-    ].join(","),
-  );
-  const ignoreSet = useMemo(() => {
-    return new Set(
-      ignoreText
-        .split(",")
-        .map((s) => s.trim())
-        .filter(Boolean),
-    );
-  }, [ignoreText]);
+  // 読み込み時間対策1：除外フォルダ（UIで編集可）
+  const { ignoreText, setIgnoreText, ignoreSet } = useIgnoreSet();
 
   // ブラウザの pick 判定
   useEffect(() => {
