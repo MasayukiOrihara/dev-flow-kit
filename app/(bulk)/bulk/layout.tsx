@@ -1,6 +1,5 @@
 import BulkWorkspaceImportClient from "@/components/client/bulkWorkspaceImportClient";
 import ModeSwitchFab from "@/components/madeSwitchFab";
-import { BulkSidebar } from "@/components/parts/bulkSidebar";
 import { BulkTabs } from "@/components/parts/bulkTabs";
 
 export default function BulkLayout({
