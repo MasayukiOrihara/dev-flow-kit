@@ -1,6 +1,7 @@
 "use client";
 
 import { ClassDesignBox } from "@/components/parts/bulk/classDesignBox";
+import { UnitTestCodeBox } from "@/components/parts/bulk/unitTestCodeBox";
 import { UnitTestDesignBox } from "@/components/parts/bulk/unitTestDesignBox";
 
 export default function UnitTestCodePage() {
@@ -11,10 +12,16 @@ export default function UnitTestCodePage() {
         <p className="text-muted-foreground">ここに生成UIを置く</p>
       </header>
 
-      <div className="flex h-full">
-        <ClassDesignBox />
-        <UnitTestDesignBox />
-        <div className="border">a</div>
+      <div className="flex h-full gap-2 min-w-0">
+        <div className="flex-1">
+          <ClassDesignBox />
+        </div>
+        <div className="flex-1">
+          <UnitTestDesignBox />
+        </div>
+        <div className="flex-1">
+          <UnitTestCodeBox />
+        </div>
       </div>
     </div>
   );

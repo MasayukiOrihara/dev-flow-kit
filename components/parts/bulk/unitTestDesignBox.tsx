@@ -96,7 +96,7 @@ export function UnitTestDesignBox() {
   };
 
   return (
-    <div className="w-[20%] border flex flex-col overflow-hidden">
+    <div className="flex flex-col h-full px-1 shadow-sm overflow-hidden">
       <h2 className="p-1">単体テスト仕様書生成</h2>
 
       <div className="flex flex-col gap-2">

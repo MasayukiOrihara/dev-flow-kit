@@ -78,7 +78,7 @@ export function ClassDesignBox() {
   };
 
   return (
-    <div className="w-[20%] border flex flex-col overflow-hidden">
+    <div className="flex flex-col h-full px-1 shadow-sm overflow-hidden">
       <h2 className="p-1">クラス仕様書生成</h2>
 
       <div className="flex flex-col gap-2">
@@ -122,7 +122,7 @@ export function ClassDesignBox() {
 
       <div className="flex flex-col overflow-hidden">
         <h3>出力結果</h3>
-        <div className="h-[40%]  overflow-y-auto scrollbar-hidden">
+        <div className="overflow-y-auto scrollbar-hidden">
           {resultText ? (
             <>
               <h3 className="text-muted-foreground mt-3">解析結果</h3>
