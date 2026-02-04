@@ -13,19 +13,17 @@ import {
   EXCEL_READ_COMPLETE,
   RESULT_GENERATING,
 } from "@/contents/messages/logger.message";
+import { UNIT_TEST_DESIGN_PK } from "@/contents/parametars/file.parametar";
 import { SheetsJson } from "@/contents/types/excel.type";
 import { postJson } from "@/lib/api/postJson.api";
 import { useMemo, useState } from "react";
-
-// 定数
-const UNIT_TEST_DESIGN_PROMPT_KIND = "testDesign";
 
 export function UnitTestDesignBox() {
   const [excelFileName, setExcelFileName] = useState("");
   const [codeFileName, setCodeFileName] = useState("");
   const [isRunning, setIsRunning] = useState(false);
   const { templates, formatId, setFormatId } = usePromptTemplates(
-    encodeURIComponent(UNIT_TEST_DESIGN_PROMPT_KIND),
+    encodeURIComponent(UNIT_TEST_DESIGN_PK),
   );
 
   const [statusText, setStatusText] = useState("");

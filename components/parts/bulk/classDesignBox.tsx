@@ -7,17 +7,15 @@ import {
   FILE_READ_ERROR,
   GENERATE_ERROR,
 } from "@/contents/messages/error.message";
+import { CLASS_DESIGN_PK } from "@/contents/parametars/file.parametar";
 import { postJson } from "@/lib/api/postJson.api";
 import { useMemo, useState } from "react";
-
-// 定数
-const CLASS_DESIGN_PROMPT_KIND = "classDesign";
 
 export function ClassDesignBox() {
   const [fileName, setFileName] = useState("");
   const [isRunning, setIsRunning] = useState(false);
   const { templates, formatId, setFormatId } = usePromptTemplates(
-    encodeURIComponent(CLASS_DESIGN_PROMPT_KIND),
+    encodeURIComponent(CLASS_DESIGN_PK),
   );
 
   const [resultText, setResultText] = useState("");

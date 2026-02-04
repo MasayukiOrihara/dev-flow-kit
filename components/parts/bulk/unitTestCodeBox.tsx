@@ -5,7 +5,6 @@ import { usePromptTemplates } from "@/components/hooks/page/usePromptTemplates";
 import { Button } from "@/components/ui/button";
 import {
   FILE_READ_ERROR,
-  GENERATE_ERROR,
   UNKNOWN_ERROR,
 } from "@/contents/messages/error.message";
 import {
@@ -13,20 +12,18 @@ import {
   EXCEL_READ_COMPLETE,
   RESULT_GENERATING,
 } from "@/contents/messages/logger.message";
+import { UNIT_TEST_CODE_PK } from "@/contents/parametars/file.parametar";
 import { SheetsJson } from "@/contents/types/excel.type";
 import { postJson } from "@/lib/api/postJson.api";
 import { postSSEJson } from "@/lib/api/postSSEJson";
 import { useMemo, useState } from "react";
-
-// 定数
-const UNIT_TEST_CODE_PROMPT_KIND = "testCode";
 
 export function UnitTestCodeBox() {
   const [excelFileName, setExcelFileName] = useState("");
   const [codeFileName, setCodeFileName] = useState("");
   const [isRunning, setIsRunning] = useState(false);
   const { templates, formatId, setFormatId } = usePromptTemplates(
-    encodeURIComponent(UNIT_TEST_CODE_PROMPT_KIND),
+    encodeURIComponent(UNIT_TEST_CODE_PK),
   );
 
   const [resultText, setResultText] = useState("");

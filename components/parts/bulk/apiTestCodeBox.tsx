@@ -4,28 +4,21 @@ import { useErrorMessage } from "@/components/hooks/page/useErrorMessage";
 import { useFileNames } from "@/components/hooks/page/useFileNames";
 import { usePromptTemplates } from "@/components/hooks/page/usePromptTemplates";
 import { Button } from "@/components/ui/button";
+import { FILE_READ_ERROR } from "@/contents/messages/error.message";
 import {
-  FILE_READ_ERROR,
-  GENERATE_ERROR,
-} from "@/contents/messages/error.message";
-import {
-  CONTROLLERFILE_READ_COMPLETE,
   PRISMAFILE_READ_COMPLETE,
   RESULT_GENERATING,
-  SERVICEFILE_READ_COMPLETE,
 } from "@/contents/messages/logger.message";
+import { API_TEST_CODE_PK } from "@/contents/parametars/file.parametar";
 import { postJson } from "@/lib/api/postJson.api";
 import { postSSEJson } from "@/lib/api/postSSEJson";
 import { useMemo, useState } from "react";
-
-// 定数
-const API_TEST_CODE_PROMPT_KIND = "apiTestCode";
 
 export function ApiTestCodeBox() {
   const { files, setFile, isReady, resetFiles } = useFileNames();
   const [isRunning, setIsRunning] = useState(false);
   const { templates, formatId, setFormatId } = usePromptTemplates(
-    encodeURIComponent(API_TEST_CODE_PROMPT_KIND),
+    encodeURIComponent(API_TEST_CODE_PK),
   );
 
   const [statusText, setStatusText] = useState("");
