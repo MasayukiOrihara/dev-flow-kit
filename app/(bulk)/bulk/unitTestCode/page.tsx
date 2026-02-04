@@ -1,6 +1,7 @@
 "use client";
 
 import { ClassDesignBox } from "@/components/parts/bulk/classDesignBox";
+import { UnitTestDesignBox } from "@/components/parts/bulk/unitTestDesignBox";
 
 export default function UnitTestCodePage() {
   return (
@@ -12,7 +13,7 @@ export default function UnitTestCodePage() {
 
       <div className="flex h-full">
         <ClassDesignBox />
-        <ClassDesignBox />
+        <UnitTestDesignBox />
         <div className="border">a</div>
       </div>
     </div>
