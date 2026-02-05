@@ -22,6 +22,7 @@ import { useMemo } from "react";
 import { ShowResult } from "./parts/showResult";
 import { StatusAndError } from "./parts/statusAndError";
 import { GenerateButton } from "./parts/generateButton";
+import { OutputTSCode } from "./parts/outputTSCode";
 
 type UnitTestCodeFileType = "unitTestDesign" | "sourceCode";
 
@@ -131,6 +132,9 @@ export function UnitTestCodeBox() {
     }
   };
 
+  // 出力ボタン表示
+  const isOutputShow = log.result.length > 0 && canRun;
+
   return (
     <div className="flex flex-col h-full px-1 shadow-sm overflow-hidden">
       <h2 className="p-1">単体テストコード生成</h2>
@@ -177,18 +181,11 @@ export function UnitTestCodeBox() {
           canRun={canRun}
           isRunning={log.isRunning}
         />
-
-        {log.result.length > 0 && canRun ? (
-          <Button
-            variant="outline"
-            onClick={exportCode}
-            disabled={log.isRunning}
-            className="hover:bg-blue-600 ml-2"
-          >
-            {log.isRunning ? "処理中..." : "TS コード出力"}
-          </Button>
-        ) : null}
-
+        <OutputTSCode
+          isShow={isOutputShow}
+          onClick={exportCode}
+          isRunning={log.isRunning}
+        />
         <StatusAndError status={log.status} error={err} />
       </div>
       <ShowResult result={log.result} />
