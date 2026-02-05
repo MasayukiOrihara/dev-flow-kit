@@ -47,9 +47,9 @@ export default function WorkspaceDropZone({ root, loadDirChildren }: Props) {
   return (
     <div
       className={[
-        "w-64 border-r p-4 transition h-screen overflow-hidden flex flex-col",
+        "w-64 border-r p-2 transition h-screen overflow-hidden flex flex-col",
         isOver ? "border-black bg-muted/30" : "border-dashed",
-        !canDrop ? "opacity-50" : "",
+        !canDrop ? "opacity-70" : "",
       ].join(" ")}
       onDragEnter={(e) => {
         if (!canDrop) return;
@@ -64,43 +64,52 @@ export default function WorkspaceDropZone({ root, loadDirChildren }: Props) {
       onDragLeave={() => setIsOver(false)}
       onDrop={onDrop}
     >
-      <div className="font-semibold">workspace/inputs にアップロード</div>
-      <div className="text-sm opacity-70 mt-1">
-        左のファイル or
-        フォルダをここにドロップすると、階層は無視してアップロードします。
+      <h1 className="text-sm font-semibold">ワークスペース</h1>
+      <div className="flex items-center">
+        <p className="text-xs opacity-70 mt-1">
+          左のファイル or フォルダをここにドロップするとコピーされます
+        </p>
+        <Button variant="outline" size="sm" onClick={load} className="ml-2">
+          {"更新"}
+        </Button>
       </div>
 
       {status ? <div className="text-xs opacity-70 mt-3">{status}</div> : null}
 
-      <h2 className="mt-4">アップロード済みファイル</h2>
+      <h2 className="mt-4 text-sm">アップロード済みファイル</h2>
 
       <div className="flex-1 overflow-y-auto scrollbar-hidden">
-        <ul className="text-sm">
+        <ul className="text-xs">
           {files.map((f) => (
-            <li key={f.id} className="py-1">
-              <a href={`/api/files/${f.id}`} target="_blank" rel="noreferrer">
-                {f.name}
-              </a>{" "}
-              <small>
-                ({Math.round(f.size / 1024)}KB / {humanizeMime(f.mime, f.name)}{" "}
-                / {new Date(f.uploadedAt).toLocaleString()})
-              </small>
-              <Button
-                variant="outline"
-                size="xs"
-                onClick={() => copyToClipboard(f.id, f.name)}
-                className="shrink-0 ml-2"
-              >
-                {copiedId === f.id ? "済" : "コピー"}
-              </Button>
-              <Button
-                variant="default"
-                size="xs"
-                onClick={() => void onDelete(f.id)}
-                className="hover:bg-red-500 ml-2"
-              >
-                削除
-              </Button>
+            <li key={f.id} className="py-1 flex justify-between">
+              <div className="flex flex-col">
+                <a href={`/api/files/${f.id}`} target="_blank" rel="noreferrer">
+                  {f.name}
+                </a>
+                <small>
+                  ({Math.round(f.size / 1024)}KB /{" "}
+                  {humanizeMime(f.mime, f.name)} /{" "}
+                  {new Date(f.uploadedAt).toLocaleString()})
+                </small>
+              </div>
+              <div className="flex flex-col gap-1">
+                <Button
+                  variant="outline"
+                  size="xs"
+                  onClick={() => copyToClipboard(f.id, f.name)}
+                  className="shrink-0 ml-2"
+                >
+                  {copiedId === f.id ? "済" : "コピー"}
+                </Button>
+                <Button
+                  variant="default"
+                  size="xs"
+                  onClick={() => void onDelete(f.id)}
+                  className="hover:bg-red-500 ml-2"
+                >
+                  削除
+                </Button>
+              </div>
             </li>
           ))}
         </ul>

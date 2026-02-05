@@ -36,7 +36,7 @@ export default function LocalDirectoryTreePicker({
     <div className="border-r p-2 w-64 h-screen flex flex-col overflow-hidden">
       <div className="flex items-start gap-3">
         <div className="flex-1">
-          <h2 className="font-semibold text-xs">{title}</h2>
+          <h2 className="font-semibold text-sm">{title}</h2>
 
           <div className="mt-1 text-xs opacity-70 flex gap-2 flex-wrap items-center">
             <span>{statsText}</span>
