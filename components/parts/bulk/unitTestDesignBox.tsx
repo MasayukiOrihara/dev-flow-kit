@@ -1,6 +1,7 @@
 "use client";
 
 import { useErrorMessage } from "@/components/hooks/page/useErrorMessage";
+import { useFileNames } from "@/components/hooks/page/useFileNames";
 import { usePromptTemplates } from "@/components/hooks/page/usePromptTemplates";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,37 +15,41 @@ import {
   RESULT_GENERATING,
 } from "@/contents/messages/logger.message";
 import { UNIT_TEST_DESIGN_PK } from "@/contents/parametars/file.parametar";
-import { SheetsJson } from "@/contents/types/excel.type";
 import { postJson } from "@/lib/api/postJson.api";
 import { useMemo, useState } from "react";
 
+type UnitTestDesignFileType = "classDesign" | "sourceCode";
+
 export function UnitTestDesignBox() {
-  const [excelFileName, setExcelFileName] = useState("");
-  const [codeFileName, setCodeFileName] = useState("");
+  const { files, setFile } = useFileNames<UnitTestDesignFileType>({
+    classDesign: "",
+    sourceCode: "",
+  });
   const [isRunning, setIsRunning] = useState(false);
   const { templates, formatId, setFormatId } = usePromptTemplates(
     encodeURIComponent(UNIT_TEST_DESIGN_PK),
   );
 
   const [statusText, setStatusText] = useState("");
+  const [resultText, setResultText] = useState("");
   const { err, clearErr, run: runSafe } = useErrorMessage(UNKNOWN_ERROR);
 
   // 動作チェック
   const canRun = useMemo(() => {
     if (isRunning) return false;
-    if (!excelFileName.trim()) return false;
-    if (!codeFileName.trim()) return false;
+    if (!files.classDesign) return false;
+    if (!files.sourceCode) return false;
     if (!formatId) return false;
     return true;
-  }, [excelFileName, codeFileName, formatId, isRunning]);
+  }, [files.classDesign, files.sourceCode, formatId, isRunning]);
 
   // 生成関数
   const runGenerateDesign = async ({ formatId }: { formatId: string }) => {
     setStatusText("");
-    // 1) エクセルファイル読み込み
-    const excelFileRes = await postJson<{ sheets: SheetsJson }>(
-      "/api/files/excelToJsonByName",
-      { fileName: excelFileName },
+    // 1) クラス仕様書読み込み
+    const classFileRes = await postJson<{ text: String }>(
+      "/api/files/textByName",
+      { fileName: files.classDesign },
       FILE_READ_ERROR,
     );
     setStatusText(EXCEL_READ_COMPLETE);
@@ -52,7 +57,7 @@ export function UnitTestDesignBox() {
     // 2) コードファイル読み込み
     const codeFileRes = await postJson<{ text: string }>(
       "/api/files/textByName",
-      { fileName: codeFileName },
+      { fileName: files.sourceCode },
       FILE_READ_ERROR,
     );
     setStatusText(CODE_READ_COMPLETE);
@@ -62,9 +67,9 @@ export function UnitTestDesignBox() {
     const outputRes = await postJson<{ message: string }>(
       "/api/unitTestDesign",
       {
-        fileName: codeFileName,
+        fileName: files.sourceCode,
         codeText: codeFileRes.text,
-        classDesign: excelFileRes.sheets,
+        classDesign: classFileRes.text,
         formatId,
       },
       GENERATE_ERROR,
@@ -99,12 +104,12 @@ export function UnitTestDesignBox() {
 
       <div className="flex flex-col gap-2">
         <div>
-          <h3>クラス仕様書（EXCEL）</h3>
+          <h3>クラス仕様書</h3>
           <input
             className="border rounded px-2 py-1"
-            value={excelFileName}
+            value={files.classDesign}
             placeholder="自動入力"
-            onChange={(e) => setExcelFileName(e.target.value)}
+            onChange={(e) => setFile("classDesign", e.target.value)}
           />
         </div>
 
@@ -112,9 +117,9 @@ export function UnitTestDesignBox() {
           <h3>対象コード</h3>
           <input
             className="border rounded px-2 py-1"
-            value={codeFileName}
+            value={files.sourceCode}
             placeholder="自動入力"
-            onChange={(e) => setCodeFileName(e.target.value)}
+            onChange={(e) => setFile("sourceCode", e.target.value)}
           />
         </div>
 
@@ -158,10 +163,6 @@ export function UnitTestDesignBox() {
               </pre>
             </>
           ) : null}
-        </div>
-        <div>
-          <p>json で出力</p>
-          <span>Excel で出力</span>
         </div>
       </div>
     </div>

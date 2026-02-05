@@ -1,6 +1,7 @@
 "use client";
 
 import { useErrorMessage } from "@/components/hooks/page/useErrorMessage";
+import { useFileNames } from "@/components/hooks/page/useFileNames";
 import { usePromptTemplates } from "@/components/hooks/page/usePromptTemplates";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,9 +19,13 @@ import { postJson } from "@/lib/api/postJson.api";
 import { postSSEJson } from "@/lib/api/postSSEJson";
 import { useMemo, useState } from "react";
 
+type UnitTestCodeFileType = "unitTestDesign" | "sourceCode";
+
 export function UnitTestCodeBox() {
-  const [excelFileName, setExcelFileName] = useState("");
-  const [codeFileName, setCodeFileName] = useState("");
+  const { files, setFile } = useFileNames<UnitTestCodeFileType>({
+    unitTestDesign: "",
+    sourceCode: "",
+  });
   const [isRunning, setIsRunning] = useState(false);
   const { templates, formatId, setFormatId } = usePromptTemplates(
     encodeURIComponent(UNIT_TEST_CODE_PK),
@@ -33,19 +38,19 @@ export function UnitTestCodeBox() {
   // 動作チェック
   const canRun = useMemo(() => {
     if (isRunning) return false;
-    if (!excelFileName.trim()) return false;
-    if (!codeFileName.trim()) return false;
+    if (!files.unitTestDesign) return false;
+    if (!files.sourceCode) return false;
     if (!formatId) return false;
     return true;
-  }, [excelFileName, codeFileName, formatId, isRunning]);
+  }, [files.unitTestDesign, files.sourceCode, formatId, isRunning]);
 
   // 生成関数
   const runGenerateDesign = async ({ formatId }: { formatId: string }) => {
     setStatusText("");
-    // 1) エクセルファイル読み込み
-    const excelFileRes = await postJson<{ sheets: SheetsJson }>(
-      "/api/files/excelToJsonByName",
-      { fileName: excelFileName },
+    // 1) 単体テスト仕様書読み込み
+    const unitTestFileRes = await postJson<{ text: string }>(
+      "/api/files/textByName",
+      { fileName: files.unitTestDesign },
       FILE_READ_ERROR,
     );
     setStatusText(EXCEL_READ_COMPLETE);
@@ -53,7 +58,7 @@ export function UnitTestCodeBox() {
     // 2) コードファイル読み込み
     const codeFileRes = await postJson<{ text: string }>(
       "/api/files/textByName",
-      { fileName: codeFileName },
+      { fileName: files.sourceCode },
       FILE_READ_ERROR,
     );
     setStatusText(CODE_READ_COMPLETE);
@@ -62,9 +67,9 @@ export function UnitTestCodeBox() {
     setStatusText(RESULT_GENERATING);
 
     const payload = {
-      fileName: codeFileName,
+      fileName: files.sourceCode,
       codeText: codeFileRes.text,
-      testDesign: excelFileRes.sheets,
+      testDesign: unitTestFileRes.text,
       formatId,
     };
     await postSSEJson("/api/jestTestCode", payload, (evt) => {
@@ -103,9 +108,9 @@ export function UnitTestCodeBox() {
           <h3>単体テスト仕様書</h3>
           <input
             className="border rounded px-2 py-1"
-            value={excelFileName}
+            value={files.unitTestDesign}
             placeholder="自動入力"
-            onChange={(e) => setExcelFileName(e.target.value)}
+            onChange={(e) => setFile("unitTestDesign", e.target.value)}
           />
         </div>
 
@@ -113,9 +118,9 @@ export function UnitTestCodeBox() {
           <h3>対象コード</h3>
           <input
             className="border rounded px-2 py-1"
-            value={codeFileName}
+            value={files.sourceCode}
             placeholder="自動入力"
-            onChange={(e) => setCodeFileName(e.target.value)}
+            onChange={(e) => setFile("sourceCode", e.target.value)}
           />
         </div>
 

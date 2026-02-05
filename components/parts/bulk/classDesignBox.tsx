@@ -20,11 +20,11 @@ import { SaveClassResultJson } from "@/contents/types/parts.type";
 import { postJson } from "@/lib/api/postJson.api";
 import { useMemo, useState } from "react";
 
-type ClassDesignFileType = "sourcecode";
+type ClassDesignFileType = "sourceCode";
 
 export function ClassDesignBox() {
   const { files, setFile, isReady, resetFiles } =
-    useFileNames<ClassDesignFileType>({ sourcecode: "" });
+    useFileNames<ClassDesignFileType>({ sourceCode: "" });
   const [isRunning, setIsRunning] = useState(false);
   const { templates, formatId, setFormatId } = usePromptTemplates(
     encodeURIComponent(CLASS_DESIGN_PK),
@@ -37,10 +37,10 @@ export function ClassDesignBox() {
   // 動作チェック
   const canRun = useMemo(() => {
     if (isRunning) return false;
-    if (!files.sourcecode) return false;
+    if (!files.sourceCode) return false;
     if (!formatId) return false;
     return true;
-  }, [files.sourcecode, formatId, isRunning]);
+  }, [files.sourceCode, formatId, isRunning]);
 
   // 生成関数
   const runGenerateDesign = async ({
@@ -88,7 +88,7 @@ export function ClassDesignBox() {
     try {
       const result: SaveClassResultJson | undefined = await runSafe(() =>
         runGenerateDesign({
-          fileName: files.sourcecode,
+          fileName: files.sourceCode,
           formatId,
         }),
       );
@@ -109,9 +109,9 @@ export function ClassDesignBox() {
           <h3>対象コード</h3>
           <input
             className="border rounded px-2 py-1"
-            value={files.sourcecode}
+            value={files.sourceCode}
             placeholder="ファイル名を入力"
-            onChange={(e) => setFile("sourcecode", e.target.value)}
+            onChange={(e) => setFile("sourceCode", e.target.value)}
           />
         </div>
         <div>
