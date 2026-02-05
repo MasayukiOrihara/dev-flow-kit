@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import {
   FILE_READ_ERROR,
   GENERATE_ERROR,
+  UNKNOWN_ERROR,
 } from "@/contents/messages/error.message";
 import {
   CODE_READ_COMPLETE,
@@ -31,23 +32,22 @@ type ClassDesignFileType = "sourceCode";
  * @returns
  */
 export function ClassDesignBox() {
-  const { files, setFile } = useFileNames<ClassDesignFileType>({
+  const { files, setFile, isReady } = useFileNames<ClassDesignFileType>({
     sourceCode: "",
   });
   const { templates, formatId, setFormatId } = usePromptTemplates(
     encodeURIComponent(CLASS_DESIGN_PK),
   );
-
-  const { err, clearErr, run: runSafe } = useErrorMessage("処理に失敗しました");
+  const { err, clearErr, run: runSafe } = useErrorMessage(UNKNOWN_ERROR);
   const log = useRunState();
 
   // 動作チェック
   const canRun = useMemo(() => {
     if (log.isRunning) return false;
-    if (!files.sourceCode) return false;
+    if (!isReady) return false;
     if (!formatId) return false;
     return true;
-  }, [files.sourceCode, formatId, log.isRunning]);
+  }, [isReady, formatId, log.isRunning]);
 
   // 生成関数
   const runGenerateDesign = async ({

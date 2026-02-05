@@ -31,7 +31,7 @@ type UnitTestCodeFileType = "unitTestDesign" | "sourceCode";
  * @returns
  */
 export function UnitTestCodeBox() {
-  const { files, setFile } = useFileNames<UnitTestCodeFileType>({
+  const { files, setFile, isReady } = useFileNames<UnitTestCodeFileType>({
     unitTestDesign: "",
     sourceCode: "",
   });
@@ -44,11 +44,10 @@ export function UnitTestCodeBox() {
   // 動作チェック
   const canRun = useMemo(() => {
     if (log.isRunning) return false;
-    if (!files.unitTestDesign) return false;
-    if (!files.sourceCode) return false;
+    if (!isReady) return false;
     if (!formatId) return false;
     return true;
-  }, [files.unitTestDesign, files.sourceCode, formatId, log.isRunning]);
+  }, [isReady, formatId, log.isRunning]);
 
   // 生成関数
   const runGenerateCode = async ({

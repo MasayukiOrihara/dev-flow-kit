@@ -15,6 +15,9 @@ export const CONTROLLERFILE_READ_COMPLETE =
 export const PRISMAFILE_READ_COMPLETE =
   "PrismaSchemaファイルを読み込みました。";
 
+export const OPEN_API_READ_COMPLETE = "OPEN API ファイルを読み込みました。";
+export const DB_MAP_READ_COMPLETE = "DB Map ファイルを読み込みました";
+
 // 中
 export const RESULT_GENERATING = "結果のファイルを生成しています...";
 export const NOW_READING = "ファイルを読み込んでいます...";
