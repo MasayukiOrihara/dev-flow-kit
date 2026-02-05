@@ -7,6 +7,13 @@ import {
   FILE_READ_ERROR,
   GENERATE_ERROR,
 } from "@/contents/messages/error.message";
+import {
+  CODE_READ_COMPLETE,
+  NOW_READING,
+  OUTPUT_RESULT,
+  OUTPUT_RESULT_FAILED,
+  RESULT_GENERATING,
+} from "@/contents/messages/logger.message";
 import { CLASS_DESIGN_PK } from "@/contents/parametars/file.parametar";
 import { SaveClassResultJson } from "@/contents/types/parts.type";
 import { postJson } from "@/lib/api/postJson.api";
@@ -19,6 +26,7 @@ export function ClassDesignBox() {
     encodeURIComponent(CLASS_DESIGN_PK),
   );
 
+  const [statusText, setStatusText] = useState("");
   const [resultText, setResultText] = useState("");
   const { err, clearErr, run: runSafe } = useErrorMessage("処理に失敗しました");
 
@@ -38,19 +46,27 @@ export function ClassDesignBox() {
     fileName: string;
     formatId: string;
   }): Promise<SaveClassResultJson> => {
+    setStatusText(NOW_READING);
     // 1) コードファイル読み込み
     const fileRes = await postJson<{ text: string }>(
       "/api/files/textByName",
       { fileName },
       FILE_READ_ERROR,
     );
+    setStatusText(CODE_READ_COMPLETE);
 
+    setStatusText(RESULT_GENERATING);
     // 2) 出力処理
     const outputRes = await postJson<SaveClassResultJson>(
       "/api/classDesign/toJson",
       { fileName, codeText: fileRes.text, formatId },
       GENERATE_ERROR,
     );
+    if (outputRes.ok) {
+      setStatusText(`${OUTPUT_RESULT}: ${outputRes.savedPath}`);
+    } else {
+      setStatusText(OUTPUT_RESULT_FAILED);
+    }
 
     return outputRes;
   };
@@ -118,28 +134,28 @@ export function ClassDesignBox() {
           {isRunning ? "処理中..." : "読み込み→生成"}
         </Button>
 
-        {err ? (
-          <p className="text-red-400 font-bold text-sm mt-2">{err}</p>
-        ) : null}
-      </div>
+        <Button disabled={true}>EXCEL 出力</Button>
 
-      <div className="flex flex-col overflow-hidden">
-        <h3>出力結果</h3>
-        <div className="overflow-y-auto scrollbar-hidden">
-          {resultText ? (
-            <>
-              <h3 className="text-muted-foreground mt-3">解析結果</h3>
-              <pre className="border rounded p-3 overflow-auto whitespace-pre-wrap scrollbar-hidden">
-                {resultText}
-              </pre>
-            </>
+        <div>
+          {statusText ? (
+            <p className="text-zinc-600 text-sm">{statusText}</p>
+          ) : null}
+          {err ? (
+            <p className="text-red-400 font-bold text-sm mt-2">{err}</p>
           ) : null}
         </div>
-        <div>
-          <p>json で出力</p>
-          <span>Excel で出力</span>
-        </div>
       </div>
+
+      {resultText ? (
+        <>
+          <h3 className="text-muted-foreground mt-3">解析結果</h3>
+          <div className="overflow-y-auto scrollbar-hidden">
+            <pre className="border text-xs rounded p-3 overflow-auto whitespace-pre-wrap scrollbar-hidden">
+              {resultText}
+            </pre>
+          </div>
+        </>
+      ) : null}
     </div>
   );
 }
