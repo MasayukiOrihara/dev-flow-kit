@@ -14,8 +14,11 @@ import { postJson } from "@/lib/api/postJson.api";
 import { postSSEJson } from "@/lib/api/postSSEJson";
 import { useMemo, useState } from "react";
 
+type ApiTestCodeFileType = "prismaSchema" | "dbMap" | "openAPI";
+
 export function ApiTestCodeBox() {
-  const { files, setFile, isReady, resetFiles } = useFileNames();
+  const { files, setFile, isReady, resetFiles } =
+    useFileNames<ApiTestCodeFileType>();
   const [isRunning, setIsRunning] = useState(false);
   const { templates, formatId, setFormatId } = usePromptTemplates(
     encodeURIComponent(API_TEST_CODE_PK),
@@ -119,9 +122,9 @@ export function ApiTestCodeBox() {
           <h3>openAPI</h3>
           <input
             className="border rounded px-2 py-1"
-            value={files.controller}
+            value={files.openAPI}
             placeholder="ファイル名を入力"
-            onChange={(e) => setFile("controller", e.target.value)}
+            onChange={(e) => setFile("openAPI", e.target.value)}
           />
         </div>
 
@@ -129,9 +132,9 @@ export function ApiTestCodeBox() {
           <h3>DB マッピング定義</h3>
           <input
             className="border rounded px-2 py-1"
-            value={files.service}
+            value={files.dbMap}
             placeholder="ファイル名を入力"
-            onChange={(e) => setFile("service", e.target.value)}
+            onChange={(e) => setFile("dbMap", e.target.value)}
           />
         </div>
 
