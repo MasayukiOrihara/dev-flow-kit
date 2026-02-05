@@ -148,11 +148,12 @@ export function ClassDesignBox() {
 
       {resultText ? (
         <>
-          <h3 className="text-muted-foreground mt-3">解析結果</h3>
-          <div className="overflow-y-auto scrollbar-hidden">
-            <pre className="border text-xs rounded p-3 overflow-auto whitespace-pre-wrap scrollbar-hidden">
+          <h3 className="text-muted-foreground my-2">解析結果</h3>
+          <div className="mb-8 overflow-y-auto scrollbar-hidden">
+            <pre className="border text-xs rounded p-2 overflow-auto whitespace-pre-wrap scrollbar-hidden">
               {resultText}
             </pre>
+            <p>---</p>
           </div>
         </>
       ) : null}
