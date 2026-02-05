@@ -14,7 +14,7 @@ import { isPlainObject } from "./object.guard";
 export const reqString = (
   body: unknown,
   key: string,
-  message: string
+  message: string,
 ): string | Response => {
   if (!isPlainObject(body)) return badRequest(message);
 
@@ -34,12 +34,30 @@ export const reqString = (
 export const reqObject = (
   body: unknown,
   key: string,
-  message: string
+  message: string,
 ): PlainObject | Response => {
   if (!isPlainObject(body)) return badRequest(message);
 
   const v = body[key];
   if (!isPlainObject(v)) return badRequest(message);
+
+  return v;
+};
+
+export const reqFlag = (
+  body: unknown,
+  key: string,
+  message: string,
+): boolean | Response => {
+  if (!isPlainObject(body)) return badRequest(message);
+
+  // 無い場合は false 扱い（エラーにはしない）
+  if (!(key in body)) return false;
+
+  const v = body[key];
+
+  // boolean 以外はエラー
+  if (typeof v !== "boolean") return badRequest(message);
 
   return v;
 };

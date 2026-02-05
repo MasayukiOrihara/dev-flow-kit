@@ -77,6 +77,7 @@ export function UnitTestCodeBox() {
       fileName: files.sourceCode,
       codeText: codeFileRes.text,
       testDesign: unitTestFileRes.text,
+      isJson: true,
       formatId,
     };
     await postSSEJson("/api/jestTestCode", payload, (evt) => {

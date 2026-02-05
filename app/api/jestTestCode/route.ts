@@ -1,6 +1,6 @@
 import * as ERR from "@/contents/messages/error.message";
 import { OpenAi41 } from "@/contents/models/openai.model";
-import { reqObject, reqString } from "@/lib/guard/api.guard";
+import { reqFlag, reqObject, reqString } from "@/lib/guard/api.guard";
 import { toUIMessageStream } from "@ai-sdk/langchain";
 import { PromptTemplate } from "@langchain/core/prompts";
 import { createUIMessageStreamResponse } from "ai";
@@ -23,9 +23,26 @@ export async function POST(req: Request) {
     // コードの取得
     const codeText = reqString(body, "codeText", ERR.CODETEXT_ERROR);
     if (codeText instanceof Response) return codeText;
-    // excelファイルの取得
-    const testDesign = reqObject(body, "testDesign", ERR.EXCELFILE_ERROR);
-    if (testDesign instanceof Response) return testDesign;
+    // 単体テスト仕様書の取得
+    const isJsonOrRes = reqFlag(body, "isJson", ERR.FLAG_ERROR);
+    if (isJsonOrRes instanceof Response) return isJsonOrRes;
+
+    let testDesign: string;
+    if (isJsonOrRes) {
+      // JSON の場合
+      const testDesignJson = reqString(body, "codeText", ERR.CODETEXT_ERROR);
+      if (testDesignJson instanceof Response) return testDesignJson;
+      testDesign = testDesignJson;
+    } else {
+      // EXCEL の場合
+      const testDesignExcel = reqObject(
+        body,
+        "testDesign",
+        ERR.EXCELFILE_ERROR,
+      );
+      if (testDesignExcel instanceof Response) return testDesignExcel;
+      testDesign = JSON.stringify(testDesignExcel, null, 2);
+    }
     // プロンプトテンプレートの取得
     const formatId = reqString(body, "formatId", ERR.TEMPLATE_ERROR);
     if (formatId instanceof Response) return formatId;
@@ -39,7 +56,7 @@ export async function POST(req: Request) {
     const promptVariables = {
       fileName: fileName,
       code: codeText,
-      testDesign: JSON.stringify(testDesign, null, 2),
+      testDesign: testDesign,
     };
     // LLM 応答
     const chain = prompt.pipe(OpenAi41);

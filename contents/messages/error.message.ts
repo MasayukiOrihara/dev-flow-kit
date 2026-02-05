@@ -9,6 +9,7 @@ export const FILENAME_ERROR = "ファイル名が取得できませんでした"
 export const CODETEXT_ERROR = "コードが取得できませんでした";
 export const EXCELFILE_ERROR = "Excelファイルが取得できませんでした";
 export const JSONFILE_ERROR = "JSON ファイルが取得できませんでした";
+export const FLAG_ERROR = "フラグが取得できませんでした";
 
 // 読み込み
 export const FILE_READ_ERROR = "ファイルが読み込みできませんでした";
