@@ -3,6 +3,7 @@
 import { useErrorMessage } from "@/components/hooks/page/useErrorMessage";
 import { useFileNames } from "@/components/hooks/page/useFileNames";
 import { usePromptTemplates } from "@/components/hooks/page/usePromptTemplates";
+import { useRunState } from "@/components/hooks/page/useRunState";
 import { Button } from "@/components/ui/button";
 import {
   FILE_READ_ERROR,
@@ -12,9 +13,13 @@ import {
 import {
   CODE_READ_COMPLETE,
   EXCEL_READ_COMPLETE,
+  OUTPUT_RESULT,
+  OUTPUT_RESULT_FAILED,
   RESULT_GENERATING,
+  START_RUN,
 } from "@/contents/messages/logger.message";
 import { UNIT_TEST_DESIGN_PK } from "@/contents/parametars/file.parametar";
+import { SaveJsonResult } from "@/contents/types/parts.type";
 import { postJson } from "@/lib/api/postJson.api";
 import { useMemo, useState } from "react";
 
@@ -25,34 +30,34 @@ export function UnitTestDesignBox() {
     classDesign: "",
     sourceCode: "",
   });
-  const [isRunning, setIsRunning] = useState(false);
   const { templates, formatId, setFormatId } = usePromptTemplates(
     encodeURIComponent(UNIT_TEST_DESIGN_PK),
   );
-
-  const [statusText, setStatusText] = useState("");
-  const [resultText, setResultText] = useState("");
   const { err, clearErr, run: runSafe } = useErrorMessage(UNKNOWN_ERROR);
+  const log = useRunState();
 
   // 動作チェック
   const canRun = useMemo(() => {
-    if (isRunning) return false;
+    if (log.isRunning) return false;
     if (!files.classDesign) return false;
     if (!files.sourceCode) return false;
     if (!formatId) return false;
     return true;
-  }, [files.classDesign, files.sourceCode, formatId, isRunning]);
+  }, [files.classDesign, files.sourceCode, formatId, log.isRunning]);
 
   // 生成関数
-  const runGenerateDesign = async ({ formatId }: { formatId: string }) => {
-    setStatusText("");
+  const runGenerateDesign = async ({
+    formatId,
+  }: {
+    formatId: string;
+  }): Promise<SaveJsonResult> => {
     // 1) クラス仕様書読み込み
     const classFileRes = await postJson<{ text: String }>(
       "/api/files/textByName",
       { fileName: files.classDesign },
       FILE_READ_ERROR,
     );
-    setStatusText(EXCEL_READ_COMPLETE);
+    log.setStatus(EXCEL_READ_COMPLETE);
 
     // 2) コードファイル読み込み
     const codeFileRes = await postJson<{ text: string }>(
@@ -60,11 +65,11 @@ export function UnitTestDesignBox() {
       { fileName: files.sourceCode },
       FILE_READ_ERROR,
     );
-    setStatusText(CODE_READ_COMPLETE);
+    log.setStatus(CODE_READ_COMPLETE);
 
     // 3) 結果生成
-    setStatusText(RESULT_GENERATING);
-    const outputRes = await postJson<{ message: string }>(
+    log.setStatus(RESULT_GENERATING);
+    const outputRes = await postJson<SaveJsonResult>(
       "/api/unitTestDesign/toJson",
       {
         fileName: files.sourceCode,
@@ -75,7 +80,13 @@ export function UnitTestDesignBox() {
       GENERATE_ERROR,
     );
 
-    setStatusText(outputRes.message);
+    if (outputRes.ok) {
+      log.setStatus(`${OUTPUT_RESULT}: ${outputRes.savedPath}`);
+    } else {
+      log.setStatus(OUTPUT_RESULT_FAILED);
+    }
+
+    return outputRes;
   };
 
   /**
@@ -85,16 +96,21 @@ export function UnitTestDesignBox() {
   const onRun = async () => {
     if (!canRun) return;
     clearErr();
-    setIsRunning(true);
+    log.start(START_RUN);
 
+    let result: SaveJsonResult | undefined;
     try {
-      await runSafe(() =>
+      result = await runSafe(() =>
         runGenerateDesign({
           formatId,
         }),
       );
     } finally {
-      setIsRunning(false);
+      if (!result?.ok) {
+        log.finish("");
+        return;
+      }
+      log.finish(result.json ?? "");
     }
   };
 
@@ -144,12 +160,14 @@ export function UnitTestDesignBox() {
           disabled={!canRun}
           className="bg-blue-400 hover:bg-blue-600"
         >
-          {isRunning ? "処理中..." : "読み込み→生成"}
+          {log.isRunning ? "処理中..." : "読み込み→生成"}
         </Button>
 
+        <Button disabled={true}>EXCEL 出力</Button>
+
         <div>
-          {statusText ? (
-            <p className="text-zinc-600 text-sm">{statusText}</p>
+          {log.status ? (
+            <p className="text-zinc-600 text-sm">{log.status}</p>
           ) : null}
           {err ? (
             <p className="text-red-400 font-bold text-sm mt-2">{err}</p>
@@ -157,12 +175,12 @@ export function UnitTestDesignBox() {
         </div>
       </div>
 
-      {resultText ? (
+      {log.result ? (
         <>
           <h3 className="text-muted-foreground my-2">解析結果</h3>
           <div className="mb-8 overflow-y-auto scrollbar-hidden">
             <pre className="border text-xs rounded p-2 overflow-auto whitespace-pre-wrap scrollbar-hidden">
-              {resultText}
+              {log.result}
             </pre>
           </div>
         </>
