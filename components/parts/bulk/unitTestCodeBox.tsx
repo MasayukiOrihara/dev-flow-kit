@@ -107,6 +107,30 @@ export function UnitTestCodeBox() {
     }
   };
 
+  /**
+   * テストコードをファイルで出力
+   * @returns
+   */
+  const exportCode = async () => {
+    if (log.isRunning) return;
+    clearErr();
+    const tempResult = log.result;
+    log.start(NOW_READING);
+
+    try {
+      // 出力
+      const res = await postJson<{ fileName: string }>(
+        "/api/jestTestCode/exportTSCode",
+        { llmText: log.result },
+        FILE_READ_ERROR,
+      );
+
+      log.setStatus(`${res.fileName} を 出力しました！`);
+    } finally {
+      log.finish(tempResult);
+    }
+  };
+
   return (
     <div className="flex flex-col h-full px-1 shadow-sm overflow-hidden">
       <h2 className="p-1">単体テストコード生成</h2>
@@ -155,6 +179,17 @@ export function UnitTestCodeBox() {
         >
           {log.isRunning ? "処理中..." : "読み込み→生成"}
         </Button>
+
+        {log.result.length > 0 && canRun ? (
+          <Button
+            variant="outline"
+            onClick={exportCode}
+            disabled={log.isRunning}
+            className="hover:bg-blue-600 ml-2"
+          >
+            {log.isRunning ? "処理中..." : "TS コード出力"}
+          </Button>
+        ) : null}
 
         <div>
           {log.status ? (
