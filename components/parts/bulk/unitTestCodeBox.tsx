@@ -21,6 +21,10 @@ import { useMemo, useState } from "react";
 
 type UnitTestCodeFileType = "unitTestDesign" | "sourceCode";
 
+/**
+ * 単体テストコード生成ボックス
+ * @returns
+ */
 export function UnitTestCodeBox() {
   const { files, setFile } = useFileNames<UnitTestCodeFileType>({
     unitTestDesign: "",

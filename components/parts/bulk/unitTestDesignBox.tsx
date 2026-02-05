@@ -25,6 +25,10 @@ import { useMemo } from "react";
 
 type UnitTestDesignFileType = "classDesign" | "sourceCode";
 
+/**
+ * 単体テスト仕様書生成ボックス
+ * @returns
+ */
 export function UnitTestDesignBox() {
   const { files, setFile } = useFileNames<UnitTestDesignFileType>({
     classDesign: "",

@@ -23,6 +23,10 @@ import { useMemo } from "react";
 
 type ClassDesignFileType = "sourceCode";
 
+/**
+ * クラス仕様書生成ボックス
+ * @returns
+ */
 export function ClassDesignBox() {
   const { files, setFile } = useFileNames<ClassDesignFileType>({
     sourceCode: "",
