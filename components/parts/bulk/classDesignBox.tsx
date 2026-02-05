@@ -16,7 +16,7 @@ import {
   RESULT_GENERATING,
 } from "@/contents/messages/logger.message";
 import { CLASS_DESIGN_PK } from "@/contents/parametars/file.parametar";
-import { SaveClassResultJson } from "@/contents/types/parts.type";
+import { SaveJsonResult } from "@/contents/types/parts.type";
 import { postJson } from "@/lib/api/postJson.api";
 import { useMemo, useState } from "react";
 
@@ -49,7 +49,7 @@ export function ClassDesignBox() {
   }: {
     fileName: string;
     formatId: string;
-  }): Promise<SaveClassResultJson> => {
+  }): Promise<SaveJsonResult> => {
     setStatusText(NOW_READING);
     // 1) コードファイル読み込み
     const fileRes = await postJson<{ text: string }>(
@@ -61,7 +61,7 @@ export function ClassDesignBox() {
 
     setStatusText(RESULT_GENERATING);
     // 2) 出力処理
-    const outputRes = await postJson<SaveClassResultJson>(
+    const outputRes = await postJson<SaveJsonResult>(
       "/api/classDesign/toJson",
       { fileName, codeText: fileRes.text, formatId },
       GENERATE_ERROR,
@@ -86,7 +86,7 @@ export function ClassDesignBox() {
     setIsRunning(true);
 
     try {
-      const result: SaveClassResultJson | undefined = await runSafe(() =>
+      const result: SaveJsonResult | undefined = await runSafe(() =>
         runGenerateDesign({
           fileName: files.sourceCode,
           formatId,
@@ -157,7 +157,6 @@ export function ClassDesignBox() {
             <pre className="border text-xs rounded p-2 overflow-auto whitespace-pre-wrap scrollbar-hidden">
               {resultText}
             </pre>
-            <p>---</p>
           </div>
         </>
       ) : null}

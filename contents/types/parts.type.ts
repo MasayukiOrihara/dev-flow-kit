@@ -8,14 +8,19 @@ export type SidebarItem = {
   titleWhenDisabled?: string; // 例: "準備中"
 };
 
-/**
- * クラス仕様書作成で json が返ってくるときの型
- */
-export type SaveClassResultJson =
-  | { ok: true; savedPath: string; metaId: string; json: string }
-  | {
-      ok: false;
-      errorType: "VALIDATION_ERROR" | "WRITE_ERROR";
-      message: string;
-      issues?: unknown;
-    };
+// json を保存したときの返す型
+export type SaveJsonOk = {
+  ok: true;
+  savedPath: string;
+  metaId: string;
+  json: string;
+};
+
+export type SaveJsonNg = {
+  ok: false;
+  errorType: "VALIDATION_ERROR" | "WRITE_ERROR";
+  message: string;
+  issues?: unknown;
+};
+
+export type SaveJsonResult = SaveJsonOk | SaveJsonNg;

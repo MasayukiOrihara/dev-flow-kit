@@ -65,7 +65,7 @@ export function UnitTestDesignBox() {
     // 3) 結果生成
     setStatusText(RESULT_GENERATING);
     const outputRes = await postJson<{ message: string }>(
-      "/api/unitTestDesign",
+      "/api/unitTestDesign/toJson",
       {
         fileName: files.sourceCode,
         codeText: codeFileRes.text,
@@ -147,24 +147,26 @@ export function UnitTestDesignBox() {
           {isRunning ? "処理中..." : "読み込み→生成"}
         </Button>
 
-        {err ? (
-          <p className="text-red-400 font-bold text-sm mt-2">{err}</p>
-        ) : null}
-      </div>
-
-      <div className="flex flex-col overflow-hidden">
-        <h3>ステータス</h3>
-        <div className="h-[40%]  overflow-y-auto scrollbar-hidden">
+        <div>
           {statusText ? (
-            <>
-              <h3 className="text-muted-foreground mt-3">解析結果</h3>
-              <pre className="border rounded p-3 overflow-auto whitespace-pre-wrap scrollbar-hidden">
-                {statusText}
-              </pre>
-            </>
+            <p className="text-zinc-600 text-sm">{statusText}</p>
+          ) : null}
+          {err ? (
+            <p className="text-red-400 font-bold text-sm mt-2">{err}</p>
           ) : null}
         </div>
       </div>
+
+      {resultText ? (
+        <>
+          <h3 className="text-muted-foreground my-2">解析結果</h3>
+          <div className="mb-8 overflow-y-auto scrollbar-hidden">
+            <pre className="border text-xs rounded p-2 overflow-auto whitespace-pre-wrap scrollbar-hidden">
+              {resultText}
+            </pre>
+          </div>
+        </>
+      ) : null}
     </div>
   );
 }
