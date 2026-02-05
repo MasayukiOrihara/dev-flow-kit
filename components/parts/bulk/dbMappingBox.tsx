@@ -20,6 +20,7 @@ import { useMemo, useState } from "react";
 import { ShowResult } from "./parts/showResult";
 import { StatusAndError } from "./parts/statusAndError";
 import { GenerateButton } from "./parts/generateButton";
+import { OutputTSCode } from "./parts/outputTSCode";
 
 type DBMappingFileType = "prismaSchema" | "controller" | "service";
 
@@ -117,6 +118,33 @@ export function DBMappingBox() {
     }
   };
 
+  /**
+   * テストコードをファイルで出力
+   * @returns
+   */
+  const exportCode = async () => {
+    if (log.isRunning) return;
+    clearErr();
+    const tempResult = log.result;
+    log.start(NOW_READING);
+
+    try {
+      // 出力
+      const res = await postJson<{ fileName: string }>(
+        "/api/apiTestCode/dbMap/exportYaml",
+        { fileName: dbMap, llmText: log.result },
+        FILE_READ_ERROR,
+      );
+
+      log.setStatus(`${res.fileName} を 出力しました！`);
+    } finally {
+      log.finish(tempResult);
+    }
+  };
+
+  // 出力ボタン表示
+  const isOutputShow = log.result.length > 0 && canRun;
+
   return (
     <div className="flex flex-col h-full px-1 shadow-sm overflow-hidden">
       <h2 className="p-1">DBマッピング仕様生成</h2>
@@ -171,6 +199,11 @@ export function DBMappingBox() {
         <GenerateButton
           onRun={onRun}
           canRun={canRun}
+          isRunning={log.isRunning}
+        />
+        <OutputTSCode
+          isShow={isOutputShow}
+          onClick={exportCode}
           isRunning={log.isRunning}
         />
         <StatusAndError status={log.status} error={err} />
