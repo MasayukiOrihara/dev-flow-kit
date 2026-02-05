@@ -11,8 +11,8 @@ import {
   UNKNOWN_ERROR,
 } from "@/contents/messages/error.message";
 import {
+  CLASS_DESIGN_READ_COMPLETE,
   CODE_READ_COMPLETE,
-  EXCEL_READ_COMPLETE,
   NOW_READING,
   OUTPUT_RESULT,
   OUTPUT_RESULT_FAILED,
@@ -61,7 +61,7 @@ export function UnitTestDesignBox() {
       { fileName: files.classDesign },
       FILE_READ_ERROR,
     );
-    log.setStatus(EXCEL_READ_COMPLETE);
+    log.setStatus(CLASS_DESIGN_READ_COMPLETE);
 
     // 2) コードファイル読み込み
     const codeFileRes = await postJson<{ text: string }>(

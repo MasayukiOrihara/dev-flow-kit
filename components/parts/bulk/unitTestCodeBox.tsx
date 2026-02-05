@@ -3,6 +3,7 @@
 import { useErrorMessage } from "@/components/hooks/page/useErrorMessage";
 import { useFileNames } from "@/components/hooks/page/useFileNames";
 import { usePromptTemplates } from "@/components/hooks/page/usePromptTemplates";
+import { useRunState } from "@/components/hooks/page/useRunState";
 import { Button } from "@/components/ui/button";
 import {
   FILE_READ_ERROR,
@@ -11,10 +12,13 @@ import {
 import {
   CODE_READ_COMPLETE,
   EXCEL_READ_COMPLETE,
+  NOW_READING,
   RESULT_GENERATING,
+  UNIT_TEST_DESIGN_READ_COMPLETE,
 } from "@/contents/messages/logger.message";
 import { UNIT_TEST_CODE_PK } from "@/contents/parametars/file.parametar";
 import { SheetsJson } from "@/contents/types/excel.type";
+import { SaveJsonResult } from "@/contents/types/parts.type";
 import { postJson } from "@/lib/api/postJson.api";
 import { postSSEJson } from "@/lib/api/postSSEJson";
 import { useMemo, useState } from "react";
@@ -30,34 +34,34 @@ export function UnitTestCodeBox() {
     unitTestDesign: "",
     sourceCode: "",
   });
-  const [isRunning, setIsRunning] = useState(false);
   const { templates, formatId, setFormatId } = usePromptTemplates(
     encodeURIComponent(UNIT_TEST_CODE_PK),
   );
-
-  const [resultText, setResultText] = useState("");
-  const [statusText, setStatusText] = useState("");
   const { err, clearErr, run: runSafe } = useErrorMessage(UNKNOWN_ERROR);
+  const log = useRunState();
 
   // 動作チェック
   const canRun = useMemo(() => {
-    if (isRunning) return false;
+    if (log.isRunning) return false;
     if (!files.unitTestDesign) return false;
     if (!files.sourceCode) return false;
     if (!formatId) return false;
     return true;
-  }, [files.unitTestDesign, files.sourceCode, formatId, isRunning]);
+  }, [files.unitTestDesign, files.sourceCode, formatId, log.isRunning]);
 
   // 生成関数
-  const runGenerateDesign = async ({ formatId }: { formatId: string }) => {
-    setStatusText("");
+  const runGenerateCode = async ({
+    formatId,
+  }: {
+    formatId: string;
+  }): Promise<SaveJsonResult> => {
     // 1) 単体テスト仕様書読み込み
     const unitTestFileRes = await postJson<{ text: string }>(
       "/api/files/textByName",
       { fileName: files.unitTestDesign },
       FILE_READ_ERROR,
     );
-    setStatusText(EXCEL_READ_COMPLETE);
+    log.setStatus(UNIT_TEST_DESIGN_READ_COMPLETE);
 
     // 2) コードファイル読み込み
     const codeFileRes = await postJson<{ text: string }>(
@@ -65,22 +69,22 @@ export function UnitTestCodeBox() {
       { fileName: files.sourceCode },
       FILE_READ_ERROR,
     );
-    setStatusText(CODE_READ_COMPLETE);
+    log.setStatus(CODE_READ_COMPLETE);
 
     // 3) 結果生成
-    setStatusText(RESULT_GENERATING);
-
+    log.setStatus(RESULT_GENERATING);
     const payload = {
       fileName: files.sourceCode,
       codeText: codeFileRes.text,
       testDesign: unitTestFileRes.text,
       formatId,
     };
-    await postSSEJson("/api/jestTestCode", payload, (evt) => {
-      if (evt.type === "text-delta" && typeof evt.delta === "string") {
-        if (evt.delta) setResultText((prev) => prev + evt.delta);
-      }
-    });
+    // await postSSEJson("/api/jestTestCode", payload, (evt) => {
+    //   if (evt.type === "text-delta" && typeof evt.delta === "string") {
+    //     if (evt.delta) log.setResult((prev) => prev + evt.delta);
+    //   }
+    // });
+    return;
   };
 
   /**
@@ -90,16 +94,21 @@ export function UnitTestCodeBox() {
   const onRun = async () => {
     if (!canRun) return;
     clearErr();
-    setIsRunning(true);
+    log.start(NOW_READING);
 
+    let result: SaveJsonResult | undefined;
     try {
-      await runSafe(() =>
-        runGenerateDesign({
+      result = await runSafe(() =>
+        runGenerateCode({
           formatId,
         }),
       );
     } finally {
-      setIsRunning(false);
+      if (!result?.ok) {
+        log.finish("");
+        return;
+      }
+      log.finish(result.json ?? "");
     }
   };
 
@@ -149,31 +158,29 @@ export function UnitTestCodeBox() {
           disabled={!canRun}
           className="bg-blue-400 hover:bg-blue-600"
         >
-          {isRunning ? "処理中..." : "読み込み→生成"}
+          {log.isRunning ? "処理中..." : "読み込み→生成"}
         </Button>
 
-        {err ? (
-          <p className="text-red-400 font-bold text-sm mt-2">{err}</p>
-        ) : null}
-      </div>
-
-      <div className="flex flex-col overflow-hidden">
-        <h3>ステータス</h3>
-        <div className="h-[40%]  overflow-y-auto scrollbar-hidden">
-          {statusText ? (
-            <>
-              <h3 className="text-muted-foreground mt-3">解析結果</h3>
-              <pre className="border rounded p-3 overflow-auto whitespace-pre-wrap scrollbar-hidden">
-                {statusText}
-              </pre>
-            </>
+        <div>
+          {log.status ? (
+            <p className="text-zinc-600 text-sm">{log.status}</p>
+          ) : null}
+          {err ? (
+            <p className="text-red-400 font-bold text-sm mt-2">{err}</p>
           ) : null}
         </div>
-        <div>
-          <p>json で出力</p>
-          <span>Excel で出力</span>
-        </div>
       </div>
+
+      {log.result ? (
+        <>
+          <h3 className="text-muted-foreground my-2">解析結果</h3>
+          <div className="mb-8 overflow-y-auto scrollbar-hidden">
+            <pre className="border text-xs rounded p-2 overflow-auto whitespace-pre-wrap scrollbar-hidden">
+              {log.result}
+            </pre>
+          </div>
+        </>
+      ) : null}
     </div>
   );
 }
