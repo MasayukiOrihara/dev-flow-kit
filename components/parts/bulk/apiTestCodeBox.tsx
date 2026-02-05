@@ -27,12 +27,11 @@ import { ShowResult } from "./parts/showResult";
 type ApiTestCodeFileType = "prismaSchema" | "dbMap" | "openAPI";
 
 export function ApiTestCodeBox() {
-  const { files, setFile, isReady, resetFiles } =
-    useFileNames<ApiTestCodeFileType>({
-      prismaSchema: "",
-      dbMap: "",
-      openAPI: "",
-    });
+  const { files, setFile, isReady } = useFileNames<ApiTestCodeFileType>({
+    prismaSchema: "",
+    dbMap: "",
+    openAPI: "",
+  });
   const { templates, formatId, setFormatId } = usePromptTemplates(
     encodeURIComponent(API_TEST_CODE_PK),
   );

@@ -21,20 +21,19 @@ import { ShowResult } from "./parts/showResult";
 import { StatusAndError } from "./parts/statusAndError";
 import { GenerateButton } from "./parts/generateButton";
 
-type DBMappingFileType = "prismaSchema" | "controller" | "service" | "dbMap";
+type DBMappingFileType = "prismaSchema" | "controller" | "service";
 
 /**
  * DBマッピング 生成ボックス
  * @returns
  */
 export function DBMappingBox() {
-  const { files, setFile, isReady, resetFiles } =
-    useFileNames<DBMappingFileType>({
-      prismaSchema: "",
-      controller: "",
-      service: "",
-      dbMap: "",
-    });
+  const { files, setFile, isReady } = useFileNames<DBMappingFileType>({
+    prismaSchema: "",
+    controller: "",
+    service: "",
+  });
+  const [dbMap, setDBMap] = useState("");
   const { templates, formatId, setFormatId } = usePromptTemplates(
     encodeURIComponent(DB_MAPPING_PK),
   );
@@ -112,7 +111,7 @@ export function DBMappingBox() {
     } finally {
       // ここでDBマッピング定義ファイル名を指定
       const tmpName = files.controller.replace(/\.controller\.ts$/, "");
-      setFile("dbMap", tmpName);
+      setDBMap(tmpName);
 
       log.finishFlagOnry();
     }
