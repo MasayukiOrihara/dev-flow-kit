@@ -8,6 +8,7 @@ import {
   GENERATE_ERROR,
 } from "@/contents/messages/error.message";
 import { CLASS_DESIGN_PK } from "@/contents/parametars/file.parametar";
+import { SaveClassResultJson } from "@/contents/types/parts.type";
 import { postJson } from "@/lib/api/postJson.api";
 import { useMemo, useState } from "react";
 
@@ -36,7 +37,7 @@ export function ClassDesignBox() {
   }: {
     fileName: string;
     formatId: string;
-  }) => {
+  }): Promise<SaveClassResultJson> => {
     // 1) コードファイル読み込み
     const fileRes = await postJson<{ text: string }>(
       "/api/files/textByName",
@@ -45,13 +46,13 @@ export function ClassDesignBox() {
     );
 
     // 2) 出力処理
-    const outputRes = await postJson<{ text: string }>(
+    const outputRes = await postJson<SaveClassResultJson>(
       "/api/classDesign/toJson",
       { fileName, codeText: fileRes.text, formatId },
       GENERATE_ERROR,
     );
 
-    return outputRes.text;
+    return outputRes;
   };
 
   /**
@@ -65,13 +66,15 @@ export function ClassDesignBox() {
     setIsRunning(true);
 
     try {
-      const resultText = await runSafe(() =>
+      const result: SaveClassResultJson | undefined = await runSafe(() =>
         runGenerateDesign({
           fileName: fileName.trim(),
           formatId,
         }),
       );
-      setResultText(resultText ?? "");
+      if (result?.ok) {
+        setResultText(result.json ?? "");
+      }
     } finally {
       setIsRunning(false);
     }

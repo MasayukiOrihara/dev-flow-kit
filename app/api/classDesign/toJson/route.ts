@@ -2,10 +2,7 @@ import {
   CLASS_DESIGN_DIR,
   OUTPUT_DIR,
 } from "@/contents/parametars/file.parametar";
-import {
-  StringOutputParser,
-  StructuredOutputParser,
-} from "@langchain/core/output_parsers";
+import { StructuredOutputParser } from "@langchain/core/output_parsers";
 import { PromptTemplate } from "@langchain/core/prompts";
 import { OpenAi41 } from "@/contents/models/openai.model";
 import * as ERR from "@/contents/messages/error.message";
@@ -20,7 +17,8 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { readMeta, writeMeta } from "@/lib/files/meta.file";
 import { FileMeta } from "@/contents/types/file.type";
-import { DEFAULT_MINE, JSON_MINE } from "@/contents/messages/mine.message";
+import { JSON_MINE } from "@/contents/messages/mine.message";
+import { SaveClassResultJson } from "@/contents/types/parts.type";
 
 export const runtime = "nodejs";
 
@@ -64,13 +62,14 @@ export async function POST(req: Request) {
     const chain = prompt.pipe(OpenAi41).pipe(parser);
     const response: ControllerSummary = await chain.invoke(promptVariables);
 
-    console.log("🐶");
-
     // json ファイル保存
-    await saveControllerSummary(response, fileName);
+    const save = await saveControllerSummary(response, fileName);
 
     console.log("ファイル解析完了 !");
-    return Response.json({ text: response }, { status: 200 });
+    if (!save.ok) {
+      return Response.json(save, { status: 400 });
+    }
+    return Response.json(save, { status: 200 });
   } catch (error) {
     const message = error instanceof Error ? error.message : ERR.UNKNOWN_ERROR;
 
@@ -82,45 +81,69 @@ export async function POST(req: Request) {
 async function saveControllerSummary(
   json: ControllerSummary,
   fileName: string,
-) {
+): Promise<SaveClassResultJson> {
   // 1. Zodで検証（ここが超重要）
   const result = ControllerSummarySchema.safeParse(json);
 
   if (!result.success) {
-    console.error("❌ Schema validation failed");
-    console.error(result.error.message);
-    throw new Error("Invalid ControllerSummary JSON");
+    return {
+      ok: false,
+      errorType: "VALIDATION_ERROR",
+      message: "Schema validation failed",
+      issues: result.error.issues,
+    };
   }
 
-  // 2. 出力先パス
-  // 念のためファイル名を安全化（パストラバーサル対策）
-  const fileNameJson = "_controller-summary.json";
-  const safeFileName = path.basename(fileName);
-  const outputPath = path.join(OUTPUT_DIR, safeFileName + fileNameJson);
+  try {
+    // 2. 出力先パス
+    // 念のためファイル名を安全化（パストラバーサル対策）
+    const fileNameJson = "controller-summary";
 
-  // 3. ディレクトリ作成（なければ）
-  await fs.mkdir(OUTPUT_DIR, { recursive: true });
+    // ファイル名の加工
+    const baseName = fileName.replace(/\.controller\.ts$/, "");
 
-  // 4. JSONファイル書き込み（整形付き）
-  await fs.writeFile(outputPath, JSON.stringify(result.data, null, 2), "utf8");
+    const id = crypto.randomUUID();
+    const nameId = id.replace(/-/g, "").slice(0, 12);
+    const outputFileName = `${baseName}_${fileNameJson}_${nameId}.json`;
 
-  // 5. メタデータ書き込み
-  const metaList = await readMeta();
+    const safeFileName = path.basename(outputFileName);
+    const filePath = path.join(OUTPUT_DIR, safeFileName);
 
-  const id = crypto.randomUUID();
-  const buf = new TextEncoder().encode(JSON.stringify(result.data, null, 2));
+    const json = JSON.stringify(result.data, null, 2);
 
-  const meta: FileMeta = {
-    id,
-    name: safeFileName,
-    size: buf.length,
-    mime: JSON_MINE,
-    savedPath: outputPath,
-    uploadedAt: new Date().toISOString(),
-  };
+    // 3. ディレクトリ作成（なければ）
+    await fs.mkdir(OUTPUT_DIR, { recursive: true });
 
-  metaList.unshift(meta);
-  await writeMeta(metaList); // 書き込み
+    // 4. JSONファイル書き込み（整形付き）
+    await fs.writeFile(filePath, json, "utf8");
 
-  console.log(`✅ JSON saved to ${outputPath}`);
+    // 5. メタデータ書き込み
+    const metaList = await readMeta();
+
+    const buf = new TextEncoder().encode(json);
+
+    const meta: FileMeta = {
+      id,
+      name: safeFileName,
+      size: buf.length,
+      mime: JSON_MINE,
+      savedPath: filePath,
+      uploadedAt: new Date().toISOString(),
+    };
+
+    metaList.unshift(meta);
+    await writeMeta(metaList); // 書き込み
+    return {
+      ok: true,
+      savedPath: filePath,
+      metaId: id,
+      json: json,
+    };
+  } catch (err) {
+    return {
+      ok: false,
+      errorType: "WRITE_ERROR",
+      message: err instanceof Error ? err.message : String(err),
+    };
+  }
 }
