@@ -16,6 +16,10 @@ export function useRunState() {
     setResult(result);
   }, []);
 
+  const finishFlagOnry = useCallback(() => {
+    setIsRunning(false);
+  }, []);
+
   const reset = useCallback(() => {
     setIsRunning(false);
     setStatus("");
@@ -27,8 +31,10 @@ export function useRunState() {
     status,
     result,
     setStatus, // 途中経過更新用
+    setResult, // SSE 結果取得用
     start,
     finish,
     reset,
+    finishFlagOnry,
   };
 }

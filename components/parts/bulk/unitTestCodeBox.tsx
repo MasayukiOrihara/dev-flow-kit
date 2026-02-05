@@ -54,7 +54,7 @@ export function UnitTestCodeBox() {
     formatId,
   }: {
     formatId: string;
-  }): Promise<SaveJsonResult> => {
+  }): Promise<void> => {
     // 1) 単体テスト仕様書読み込み
     const unitTestFileRes = await postJson<{ text: string }>(
       "/api/files/textByName",
@@ -79,12 +79,11 @@ export function UnitTestCodeBox() {
       testDesign: unitTestFileRes.text,
       formatId,
     };
-    // await postSSEJson("/api/jestTestCode", payload, (evt) => {
-    //   if (evt.type === "text-delta" && typeof evt.delta === "string") {
-    //     if (evt.delta) log.setResult((prev) => prev + evt.delta);
-    //   }
-    // });
-    return;
+    await postSSEJson("/api/jestTestCode", payload, (evt) => {
+      if (evt.type === "text-delta" && typeof evt.delta === "string") {
+        if (evt.delta) log.setResult((prev) => prev + evt.delta);
+      }
+    });
   };
 
   /**
@@ -96,19 +95,14 @@ export function UnitTestCodeBox() {
     clearErr();
     log.start(NOW_READING);
 
-    let result: SaveJsonResult | undefined;
     try {
-      result = await runSafe(() =>
+      await runSafe(() =>
         runGenerateCode({
           formatId,
         }),
       );
     } finally {
-      if (!result?.ok) {
-        log.finish("");
-        return;
-      }
-      log.finish(result.json ?? "");
+      log.finishFlagOnry();
     }
   };
 
