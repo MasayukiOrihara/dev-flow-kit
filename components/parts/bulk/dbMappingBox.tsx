@@ -16,11 +16,16 @@ import { postJson } from "@/lib/api/postJson.api";
 import { postSSEJson } from "@/lib/api/postSSEJson";
 import { useMemo, useState } from "react";
 
-type ApiTestCodeFileType = "prismaSchema" | "controller" | "service" | "dbMap";
+type DBMappingFileType = "prismaSchema" | "controller" | "service" | "dbMap";
 
 export function DBMappingBox() {
   const { files, setFile, isReady, resetFiles } =
-    useFileNames<ApiTestCodeFileType>();
+    useFileNames<DBMappingFileType>({
+      prismaSchema: "",
+      controller: "",
+      service: "",
+      dbMap: "",
+    });
   const [isRunning, setIsRunning] = useState(false);
   const { templates, formatId, setFormatId } = usePromptTemplates(
     encodeURIComponent(DB_MAPPING_PK),

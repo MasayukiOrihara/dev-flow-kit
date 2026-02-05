@@ -1,6 +1,7 @@
 "use client";
 
 import { useErrorMessage } from "@/components/hooks/page/useErrorMessage";
+import { useFileNames } from "@/components/hooks/page/useFileNames";
 import { usePromptTemplates } from "@/components/hooks/page/usePromptTemplates";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,8 +20,11 @@ import { SaveClassResultJson } from "@/contents/types/parts.type";
 import { postJson } from "@/lib/api/postJson.api";
 import { useMemo, useState } from "react";
 
+type ClassDesignFileType = "sourcecode";
+
 export function ClassDesignBox() {
-  const [fileName, setFileName] = useState("");
+  const { files, setFile, isReady, resetFiles } =
+    useFileNames<ClassDesignFileType>({ sourcecode: "" });
   const [isRunning, setIsRunning] = useState(false);
   const { templates, formatId, setFormatId } = usePromptTemplates(
     encodeURIComponent(CLASS_DESIGN_PK),
@@ -33,10 +37,10 @@ export function ClassDesignBox() {
   // 動作チェック
   const canRun = useMemo(() => {
     if (isRunning) return false;
-    if (!fileName.trim()) return false;
+    if (!files.sourcecode) return false;
     if (!formatId) return false;
     return true;
-  }, [fileName, formatId, isRunning]);
+  }, [files.sourcecode, formatId, isRunning]);
 
   // 生成関数
   const runGenerateDesign = async ({
@@ -84,7 +88,7 @@ export function ClassDesignBox() {
     try {
       const result: SaveClassResultJson | undefined = await runSafe(() =>
         runGenerateDesign({
-          fileName: fileName.trim(),
+          fileName: files.sourcecode,
           formatId,
         }),
       );
@@ -105,9 +109,9 @@ export function ClassDesignBox() {
           <h3>対象コード</h3>
           <input
             className="border rounded px-2 py-1"
-            value={fileName}
+            value={files.sourcecode}
             placeholder="ファイル名を入力"
-            onChange={(e) => setFileName(e.target.value)}
+            onChange={(e) => setFile("sourcecode", e.target.value)}
           />
         </div>
         <div>

@@ -18,7 +18,11 @@ type ApiTestCodeFileType = "prismaSchema" | "dbMap" | "openAPI";
 
 export function ApiTestCodeBox() {
   const { files, setFile, isReady, resetFiles } =
-    useFileNames<ApiTestCodeFileType>();
+    useFileNames<ApiTestCodeFileType>({
+      prismaSchema: "",
+      dbMap: "",
+      openAPI: "",
+    });
   const [isRunning, setIsRunning] = useState(false);
   const { templates, formatId, setFormatId } = usePromptTemplates(
     encodeURIComponent(API_TEST_CODE_PK),
