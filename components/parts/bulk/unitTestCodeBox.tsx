@@ -11,17 +11,15 @@ import {
 } from "@/contents/messages/error.message";
 import {
   CODE_READ_COMPLETE,
-  EXCEL_READ_COMPLETE,
   NOW_READING,
   RESULT_GENERATING,
   UNIT_TEST_DESIGN_READ_COMPLETE,
 } from "@/contents/messages/logger.message";
 import { UNIT_TEST_CODE_PK } from "@/contents/parametars/file.parametar";
-import { SheetsJson } from "@/contents/types/excel.type";
-import { SaveJsonResult } from "@/contents/types/parts.type";
 import { postJson } from "@/lib/api/postJson.api";
 import { postSSEJson } from "@/lib/api/postSSEJson";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
+import { ShowResult } from "./parts/showResult";
 
 type UnitTestCodeFileType = "unitTestDesign" | "sourceCode";
 
@@ -201,16 +199,7 @@ export function UnitTestCodeBox() {
         </div>
       </div>
 
-      {log.result ? (
-        <>
-          <h3 className="text-muted-foreground my-2">解析結果</h3>
-          <div className="mb-8 overflow-y-auto scrollbar-hidden">
-            <pre className="border text-xs rounded p-2 overflow-auto whitespace-pre-wrap scrollbar-hidden">
-              {log.result}
-            </pre>
-          </div>
-        </>
-      ) : null}
+      <ShowResult result={log.result} />
     </div>
   );
 }

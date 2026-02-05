@@ -20,6 +20,7 @@ import { CLASS_DESIGN_PK } from "@/contents/parametars/file.parametar";
 import { SaveJsonResult } from "@/contents/types/parts.type";
 import { postJson } from "@/lib/api/postJson.api";
 import { useMemo } from "react";
+import { ShowResult } from "./parts/showResult";
 
 type ClassDesignFileType = "sourceCode";
 
@@ -154,16 +155,7 @@ export function ClassDesignBox() {
         </div>
       </div>
 
-      {log.result ? (
-        <>
-          <h3 className="text-muted-foreground my-2">解析結果</h3>
-          <div className="mb-8 overflow-y-auto scrollbar-hidden">
-            <pre className="border text-xs rounded p-2 overflow-auto whitespace-pre-wrap scrollbar-hidden">
-              {log.result}
-            </pre>
-          </div>
-        </>
-      ) : null}
+      <ShowResult result={log.result} />
     </div>
   );
 }

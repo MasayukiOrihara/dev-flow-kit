@@ -3,10 +3,12 @@
 import { useErrorMessage } from "@/components/hooks/page/useErrorMessage";
 import { useFileNames } from "@/components/hooks/page/useFileNames";
 import { usePromptTemplates } from "@/components/hooks/page/usePromptTemplates";
+import { useRunState } from "@/components/hooks/page/useRunState";
 import { Button } from "@/components/ui/button";
 import { FILE_READ_ERROR } from "@/contents/messages/error.message";
 import {
   CONTROLLERFILE_READ_COMPLETE,
+  NOW_READING,
   PRISMAFILE_READ_COMPLETE,
   RESULT_GENERATING,
   SERVICEFILE_READ_COMPLETE,
@@ -15,9 +17,14 @@ import { DB_MAPPING_PK } from "@/contents/parametars/file.parametar";
 import { postJson } from "@/lib/api/postJson.api";
 import { postSSEJson } from "@/lib/api/postSSEJson";
 import { useMemo, useState } from "react";
+import { ShowResult } from "./parts/showResult";
 
 type DBMappingFileType = "prismaSchema" | "controller" | "service" | "dbMap";
 
+/**
+ * DBマッピング 生成ボックス
+ * @returns
+ */
 export function DBMappingBox() {
   const { files, setFile, isReady, resetFiles } =
     useFileNames<DBMappingFileType>({
@@ -26,22 +33,19 @@ export function DBMappingBox() {
       service: "",
       dbMap: "",
     });
-  const [isRunning, setIsRunning] = useState(false);
   const { templates, formatId, setFormatId } = usePromptTemplates(
     encodeURIComponent(DB_MAPPING_PK),
   );
-
-  const [statusText, setStatusText] = useState("");
-  const [resultText, setResultText] = useState("");
   const { err, clearErr, run: runSafe } = useErrorMessage("処理に失敗しました");
+  const log = useRunState();
 
   // 動作チェック
   const canRun = useMemo(() => {
-    if (isRunning) return false;
+    if (log.isRunning) return false;
     if (!isReady) return false;
     if (!formatId) return false;
     return true;
-  }, [isReady, formatId, isRunning]);
+  }, [isReady, formatId, log.isRunning]);
 
   // 生成関数
   const runGenerateDesign = async ({ formatId }: { formatId: string }) => {
@@ -51,7 +55,7 @@ export function DBMappingBox() {
       { fileName: files.prismaSchema },
       FILE_READ_ERROR,
     );
-    setStatusText(PRISMAFILE_READ_COMPLETE);
+    log.setStatus(PRISMAFILE_READ_COMPLETE);
 
     // 2) コントローラーコードファイル読み込み
     const controllerFileRes = await postJson<{ text: string }>(
@@ -59,7 +63,7 @@ export function DBMappingBox() {
       { fileName: files.controller },
       FILE_READ_ERROR,
     );
-    setStatusText(CONTROLLERFILE_READ_COMPLETE);
+    log.setStatus(CONTROLLERFILE_READ_COMPLETE);
 
     // 2) サービスファイル読み込み
     const serviceFileRes = await postJson<{ text: string }>(
@@ -67,10 +71,10 @@ export function DBMappingBox() {
       { fileName: files.service },
       FILE_READ_ERROR,
     );
-    setStatusText(SERVICEFILE_READ_COMPLETE);
+    log.setStatus(SERVICEFILE_READ_COMPLETE);
 
     // 3) 結果生成
-    setStatusText(RESULT_GENERATING);
+    log.setStatus(RESULT_GENERATING);
 
     const payload = {
       prismaSchema: files.prismaSchema,
@@ -83,13 +87,9 @@ export function DBMappingBox() {
     };
     await postSSEJson("/api/apiTestCode/dbMap", payload, (evt) => {
       if (evt.type === "text-delta" && typeof evt.delta === "string") {
-        if (evt.delta) setResultText((prev) => prev + evt.delta);
+        if (evt.delta) log.setResult((prev) => prev + evt.delta);
       }
     });
-
-    // ここでDBマッピング定義ファイル名を指定
-    const tmpName = files.controller.replace(/\.controller\.ts$/, "");
-    setFile("dbMap", tmpName);
   };
 
   /**
@@ -98,19 +98,21 @@ export function DBMappingBox() {
    */
   const onRun = async () => {
     if (!canRun) return;
-
     clearErr();
-    setIsRunning(true);
+    log.start(NOW_READING);
 
     try {
-      const resultText = await runSafe(() =>
+      await runSafe(() =>
         runGenerateDesign({
           formatId,
         }),
       );
-      setResultText(resultText ?? "");
     } finally {
-      setIsRunning(false);
+      // ここでDBマッピング定義ファイル名を指定
+      const tmpName = files.controller.replace(/\.controller\.ts$/, "");
+      setFile("dbMap", tmpName);
+
+      log.finishFlagOnry();
     }
   };
 
@@ -170,31 +172,20 @@ export function DBMappingBox() {
           disabled={!canRun}
           className="bg-blue-400 hover:bg-blue-600"
         >
-          {isRunning ? "処理中..." : "読み込み→生成"}
+          {log.isRunning ? "処理中..." : "読み込み→生成"}
         </Button>
 
-        {err ? (
-          <p className="text-red-400 font-bold text-sm mt-2">{err}</p>
-        ) : null}
-      </div>
-
-      <div className="flex flex-col overflow-hidden">
-        <h3>出力結果</h3>
-        <div className="overflow-y-auto scrollbar-hidden">
-          {resultText ? (
-            <>
-              <h3 className="text-muted-foreground mt-3">解析結果</h3>
-              <pre className="border rounded p-3 overflow-auto whitespace-pre-wrap scrollbar-hidden">
-                {resultText}
-              </pre>
-            </>
+        <div>
+          {log.status ? (
+            <p className="text-zinc-600 text-sm">{log.status}</p>
+          ) : null}
+          {err ? (
+            <p className="text-red-400 font-bold text-sm mt-2">{err}</p>
           ) : null}
         </div>
-        <div>
-          <p>json で出力</p>
-          <span>Excel で出力</span>
-        </div>
       </div>
+
+      <ShowResult result={log.result} />
     </div>
   );
 }
