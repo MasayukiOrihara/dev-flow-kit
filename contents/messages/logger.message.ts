@@ -1,6 +1,3 @@
-// はじめ
-export const START_RUN = "処理を開始しました...";
-
 // 読み込み
 export const EXCEL_READ_COMPLETE = "Excelファイルを読み込みました。";
 export const CODE_READ_COMPLETE = "コードファイルを読み込みました。";

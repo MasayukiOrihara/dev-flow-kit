@@ -13,15 +13,15 @@ import {
 import {
   CODE_READ_COMPLETE,
   EXCEL_READ_COMPLETE,
+  NOW_READING,
   OUTPUT_RESULT,
   OUTPUT_RESULT_FAILED,
   RESULT_GENERATING,
-  START_RUN,
 } from "@/contents/messages/logger.message";
 import { UNIT_TEST_DESIGN_PK } from "@/contents/parametars/file.parametar";
 import { SaveJsonResult } from "@/contents/types/parts.type";
 import { postJson } from "@/lib/api/postJson.api";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 
 type UnitTestDesignFileType = "classDesign" | "sourceCode";
 
@@ -96,7 +96,7 @@ export function UnitTestDesignBox() {
   const onRun = async () => {
     if (!canRun) return;
     clearErr();
-    log.start(START_RUN);
+    log.start(NOW_READING);
 
     let result: SaveJsonResult | undefined;
     try {

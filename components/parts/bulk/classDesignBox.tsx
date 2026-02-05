@@ -3,6 +3,7 @@
 import { useErrorMessage } from "@/components/hooks/page/useErrorMessage";
 import { useFileNames } from "@/components/hooks/page/useFileNames";
 import { usePromptTemplates } from "@/components/hooks/page/usePromptTemplates";
+import { useRunState } from "@/components/hooks/page/useRunState";
 import { Button } from "@/components/ui/button";
 import {
   FILE_READ_ERROR,
@@ -18,29 +19,28 @@ import {
 import { CLASS_DESIGN_PK } from "@/contents/parametars/file.parametar";
 import { SaveJsonResult } from "@/contents/types/parts.type";
 import { postJson } from "@/lib/api/postJson.api";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 
 type ClassDesignFileType = "sourceCode";
 
 export function ClassDesignBox() {
-  const { files, setFile, isReady, resetFiles } =
-    useFileNames<ClassDesignFileType>({ sourceCode: "" });
-  const [isRunning, setIsRunning] = useState(false);
+  const { files, setFile } = useFileNames<ClassDesignFileType>({
+    sourceCode: "",
+  });
   const { templates, formatId, setFormatId } = usePromptTemplates(
     encodeURIComponent(CLASS_DESIGN_PK),
   );
 
-  const [statusText, setStatusText] = useState("");
-  const [resultText, setResultText] = useState("");
   const { err, clearErr, run: runSafe } = useErrorMessage("処理に失敗しました");
+  const log = useRunState();
 
   // 動作チェック
   const canRun = useMemo(() => {
-    if (isRunning) return false;
+    if (log.isRunning) return false;
     if (!files.sourceCode) return false;
     if (!formatId) return false;
     return true;
-  }, [files.sourceCode, formatId, isRunning]);
+  }, [files.sourceCode, formatId, log.isRunning]);
 
   // 生成関数
   const runGenerateDesign = async ({
@@ -50,16 +50,15 @@ export function ClassDesignBox() {
     fileName: string;
     formatId: string;
   }): Promise<SaveJsonResult> => {
-    setStatusText(NOW_READING);
     // 1) コードファイル読み込み
     const fileRes = await postJson<{ text: string }>(
       "/api/files/textByName",
       { fileName },
       FILE_READ_ERROR,
     );
-    setStatusText(CODE_READ_COMPLETE);
+    log.setStatus(CODE_READ_COMPLETE);
 
-    setStatusText(RESULT_GENERATING);
+    log.setStatus(RESULT_GENERATING);
     // 2) 出力処理
     const outputRes = await postJson<SaveJsonResult>(
       "/api/classDesign/toJson",
@@ -67,9 +66,9 @@ export function ClassDesignBox() {
       GENERATE_ERROR,
     );
     if (outputRes.ok) {
-      setStatusText(`${OUTPUT_RESULT}: ${outputRes.savedPath}`);
+      log.setStatus(`${OUTPUT_RESULT}: ${outputRes.savedPath}`);
     } else {
-      setStatusText(OUTPUT_RESULT_FAILED);
+      log.setStatus(OUTPUT_RESULT_FAILED);
     }
 
     return outputRes;
@@ -81,22 +80,23 @@ export function ClassDesignBox() {
    */
   const onRun = async () => {
     if (!canRun) return;
-
     clearErr();
-    setIsRunning(true);
+    log.start(NOW_READING);
 
+    let result: SaveJsonResult | undefined;
     try {
-      const result: SaveJsonResult | undefined = await runSafe(() =>
+      result = await runSafe(() =>
         runGenerateDesign({
           fileName: files.sourceCode,
           formatId,
         }),
       );
-      if (result?.ok) {
-        setResultText(result.json ?? "");
-      }
     } finally {
-      setIsRunning(false);
+      if (!result?.ok) {
+        log.finish("");
+        return;
+      }
+      log.finish(result.json ?? "");
     }
   };
 
@@ -135,14 +135,14 @@ export function ClassDesignBox() {
           disabled={!canRun}
           className="bg-blue-400 hover:bg-blue-600"
         >
-          {isRunning ? "処理中..." : "読み込み→生成"}
+          {log.isRunning ? "処理中..." : "読み込み→生成"}
         </Button>
 
         <Button disabled={true}>EXCEL 出力</Button>
 
         <div>
-          {statusText ? (
-            <p className="text-zinc-600 text-sm">{statusText}</p>
+          {log.status ? (
+            <p className="text-zinc-600 text-sm">{log.status}</p>
           ) : null}
           {err ? (
             <p className="text-red-400 font-bold text-sm mt-2">{err}</p>
@@ -150,12 +150,12 @@ export function ClassDesignBox() {
         </div>
       </div>
 
-      {resultText ? (
+      {log.result ? (
         <>
           <h3 className="text-muted-foreground my-2">解析結果</h3>
           <div className="mb-8 overflow-y-auto scrollbar-hidden">
             <pre className="border text-xs rounded p-2 overflow-auto whitespace-pre-wrap scrollbar-hidden">
-              {resultText}
+              {log.result}
             </pre>
           </div>
         </>
