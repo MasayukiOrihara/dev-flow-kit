@@ -22,6 +22,7 @@ import { postJson } from "@/lib/api/postJson.api";
 import { useMemo } from "react";
 import { ShowResult } from "./parts/showResult";
 import { StatusAndError } from "./parts/statusAndError";
+import { GenerateButton } from "./parts/generateButton";
 
 type ClassDesignFileType = "sourceCode";
 
@@ -136,14 +137,11 @@ export function ClassDesignBox() {
           </select>
         </div>
 
-        <Button
-          onClick={onRun}
-          disabled={!canRun}
-          className="bg-blue-400 hover:bg-blue-600"
-        >
-          {log.isRunning ? "処理中..." : "読み込み→生成"}
-        </Button>
-
+        <GenerateButton
+          onRun={onRun}
+          canRun={canRun}
+          isRunning={log.isRunning}
+        />
         <Button disabled={true}>EXCEL 出力</Button>
         <StatusAndError status={log.status} error={err} />
       </div>

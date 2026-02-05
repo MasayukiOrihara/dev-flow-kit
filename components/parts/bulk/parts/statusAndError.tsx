@@ -1,15 +1,14 @@
+type StatusAndErrorProps = {
+  status: string;
+  error?: string | null;
+};
+
 /**
  * ステータスとエラーの表示部分
  * @param param0
  * @returns
  */
-export function StatusAndError({
-  status,
-  error,
-}: {
-  status: string;
-  error?: string | null;
-}) {
+export function StatusAndError({ status, error }: StatusAndErrorProps) {
   return (
     <div>
       {status ? <p className="text-zinc-600 text-sm">{status}</p> : null}

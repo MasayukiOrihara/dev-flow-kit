@@ -1,9 +1,13 @@
+type ShowResultProps = {
+  result: string;
+};
+
 /**
  * 出力結果の内容を表示するコンポーネント
  * @param param0
  * @returns
  */
-export function ShowResult({ result }: { result: string }) {
+export function ShowResult({ result }: ShowResultProps) {
   return (
     <>
       {result ? (

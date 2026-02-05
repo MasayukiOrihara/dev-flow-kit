@@ -19,6 +19,7 @@ import { postSSEJson } from "@/lib/api/postSSEJson";
 import { useMemo, useState } from "react";
 import { ShowResult } from "./parts/showResult";
 import { StatusAndError } from "./parts/statusAndError";
+import { GenerateButton } from "./parts/generateButton";
 
 type DBMappingFileType = "prismaSchema" | "controller" | "service" | "dbMap";
 
@@ -168,14 +169,11 @@ export function DBMappingBox() {
           </select>
         </div>
 
-        <Button
-          onClick={onRun}
-          disabled={!canRun}
-          className="bg-blue-400 hover:bg-blue-600"
-        >
-          {log.isRunning ? "処理中..." : "読み込み→生成"}
-        </Button>
-
+        <GenerateButton
+          onRun={onRun}
+          canRun={canRun}
+          isRunning={log.isRunning}
+        />
         <StatusAndError status={log.status} error={err} />
       </div>
       <ShowResult result={log.result} />
