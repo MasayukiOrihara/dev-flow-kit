@@ -20,6 +20,7 @@ import { postJson } from "@/lib/api/postJson.api";
 import { postSSEJson } from "@/lib/api/postSSEJson";
 import { useMemo } from "react";
 import { ShowResult } from "./parts/showResult";
+import { StatusAndError } from "./parts/statusAndError";
 
 type UnitTestCodeFileType = "unitTestDesign" | "sourceCode";
 
@@ -189,16 +190,8 @@ export function UnitTestCodeBox() {
           </Button>
         ) : null}
 
-        <div>
-          {log.status ? (
-            <p className="text-zinc-600 text-sm">{log.status}</p>
-          ) : null}
-          {err ? (
-            <p className="text-red-400 font-bold text-sm mt-2">{err}</p>
-          ) : null}
-        </div>
+        <StatusAndError status={log.status} error={err} />
       </div>
-
       <ShowResult result={log.result} />
     </div>
   );
